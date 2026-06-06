@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>MusiFree TV - Specchia lo Schermo & Music TV</title>
   <meta name="description" content="Trasforma il tuo browser in una TV musicale con testi sincronizzati o specchia lo schermo del tuo telefono via WebRTC. Compatibile con GitHub Pages.">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📺</text></svg>">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none'><defs><linearGradient id='g' x1='0%25' y1='100%25' x2='100%25' y2='0%25'><stop offset='0%25' stop-color='%232f60ff'/><stop offset='50%25' stop-color='%239d27ff'/><stop offset='100%25' stop-color='%23ff00ff'/></linearGradient></defs><circle cx='34' cy='63' r='12' fill='url(%23g)'/><circle cx='66' cy='57' r='12' fill='url(%23g)'/><path d='M 40 63 L 40 31 L 56 43 L 72 31 L 72 57' stroke='url(%23g)' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'/></svg>">
 
   <!-- CDNs for styling & icons & signaling -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -257,7 +257,21 @@
     
     <!-- 1. LANDING/ROLE SELECTOR -->
     <div id="view-landing" class="flex-1 flex items-center justify-center p-6">
-      <div class="glass-card p-10 max-w-md w-full text-center">
+      <div class="glass-card p-10 max-w-md w-full text-center flex flex-col items-center">
+        <div class="w-24 h-24 mb-6">
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+            <defs>
+              <linearGradient id="logo-grad-landing" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#2f60ff" />
+                <stop offset="50%" stop-color="#9d27ff" />
+                <stop offset="100%" stop-color="#ff00ff" />
+              </linearGradient>
+            </defs>
+            <circle cx="34" cy="63" r="12" fill="url(#logo-grad-landing)" />
+            <circle cx="66" cy="57" r="12" fill="url(#logo-grad-landing)" />
+            <path d="M 40 63 L 40 31 L 56 43 L 72 31 L 72 57" stroke="url(#logo-grad-landing)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+          </svg>
+        </div>
         <h1 class="font-display font-extrabold text-4xl mb-3 tracking-tight bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent">MusiFree TV</h1>
         <p class="text-sm text-gray-400 mb-8">Trasforma il tuo browser in una TV musicale con testi o specchia lo schermo con WebRTC. Nessun server necessario.</p>
         
@@ -285,28 +299,34 @@
           <button onclick="toggleFullscreen()" class="glass-button p-2.5 rounded-full">
             <i data-lucide="maximize" id="fs-icon"></i>
           </button>
-          <button onclick="goBack()" class="glass-button px-4 py-1.5 text-xs">Esci</button>
+          <button onclick="location.reload()" class="glass-button px-4 py-1.5 text-xs">Reset</button>
         </div>
       </div>
 
       <!-- TV Wait Screen -->
       <div id="tv-wait-screen" class="flex-1 flex items-center justify-center z-10">
         <div class="glass-card p-8 max-w-lg w-full text-center flex flex-col items-center">
-          <i data-lucide="cast" class="text-purple-400 w-16 h-16 mb-5 animate-pulse"></i>
+          <div class="w-20 h-20 mb-5 animate-pulse">
+            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+              <defs>
+                <linearGradient id="logo-grad-wait" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#2f60ff" />
+                  <stop offset="50%" stop-color="#9d27ff" />
+                  <stop offset="100%" stop-color="#ff00ff" />
+                </linearGradient>
+              </defs>
+              <circle cx="34" cy="63" r="12" fill="url(#logo-grad-wait)" />
+              <circle cx="66" cy="57" r="12" fill="url(#logo-grad-wait)" />
+              <path d="M 40 63 L 40 31 L 56 43 L 72 31 L 72 57" stroke="url(#logo-grad-wait)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+            </svg>
+          </div>
           <h2 class="font-display text-2xl font-bold mb-3">Configura MusiFree TV</h2>
-          <p class="text-xs text-gray-400 mb-6">Inquadra il codice QR con il telefono o visita il sito inserendo questo codice per associare i dispositivi.</p>
+          <p class="text-xs text-gray-400 mb-6">Apri il telecomando su un altro dispositivo ed inserisci questo codice numerico per associare i dispositivi.</p>
           
-          <div class="flex flex-col md:flex-row gap-6 items-center justify-center bg-black/30 p-5 rounded-2xl border border-white/5 w-full">
-            <!-- Pairing QR code container -->
-            <div id="qr-container" class="bg-white p-2 rounded-xl">
-              <img id="qr-img" src="" alt="QR Code" class="w-36 h-36">
-            </div>
-            
-            <div class="text-left">
-              <span class="text-[10px] text-gray-500 block uppercase tracking-wider mb-1">Codice Stanza</span>
-              <span id="tv-room-code" class="font-display text-4xl font-extrabold text-white tracking-widest block">MF-----</span>
-              <span id="tv-domain-url" class="text-[10px] text-purple-400 mt-2 block break-all"></span>
-            </div>
+          <div class="flex flex-col gap-4 items-center justify-center bg-black/30 p-6 rounded-2xl border border-white/5 w-full text-center">
+            <span class="text-[10px] text-gray-500 block uppercase tracking-wider mb-1">Codice Stanza</span>
+            <span id="tv-room-code" class="font-display text-5xl font-extrabold text-white tracking-widest block">-----</span>
+            <span id="tv-domain-url" class="text-[10px] text-purple-400 mt-1 block"></span>
           </div>
         </div>
       </div>
@@ -375,10 +395,10 @@
       <div id="remote-join-screen" class="flex-grow flex items-center justify-center">
         <div class="glass-card p-6 w-full">
           <h3 class="font-display text-md font-bold mb-2">Connettiti alla TV</h3>
-          <p class="text-[10px] text-gray-400 mb-6">Inserisci il codice di 5 lettere mostrato sulla TV.</p>
+          <p class="text-[10px] text-gray-400 mb-6">Inserisci il codice di 5 numeri mostrato sulla TV.</p>
           
           <div class="flex flex-col gap-4">
-            <input id="remote-code-input" type="text" placeholder="Codice (es. MF-ABCDE)" class="glass-input text-center text-lg tracking-widest font-mono py-3 font-bold uppercase">
+            <input id="remote-code-input" type="text" placeholder="Codice (es. 12345)" maxlength="5" class="glass-input text-center text-lg tracking-widest font-mono py-3 font-bold uppercase">
             <div id="remote-error" class="hidden text-red-400 text-[10px] flex items-center gap-1">
               <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
               <span id="remote-error-text">Codice non valido</span>
@@ -394,7 +414,7 @@
         <div class="glass-panel p-3.5 rounded-xl flex justify-between items-center text-[10px]">
           <span class="flex items-center gap-2 font-medium">
             <i data-lucide="wifi" class="text-green-400 w-4 h-4 animate-pulse"></i>
-            Connesso alla TV: <strong id="remote-paired-code" class="text-purple-300">MF-XXXX</strong>
+            Connesso alla TV: <strong id="remote-paired-code" class="text-purple-300">-----</strong>
           </span>
           <span class="px-2 py-0.5 rounded bg-green-500/10 text-green-400 font-bold uppercase tracking-wider">Online</span>
         </div>
@@ -478,15 +498,19 @@
       checkUrlParams();
     });
 
-    // Check url params for direct pairing
+    // Check url params for direct pairing, otherwise default to 'tv'
     function checkUrlParams() {
       const params = new URLSearchParams(window.location.search);
       const role = params.get('role');
       const code = params.get('code');
       
-      if (role === 'remote' && code) {
+      if (role === 'remote') {
         selectRole('remote');
-        document.getElementById('remote-code-input').value = code;
+        if (code) {
+          document.getElementById('remote-code-input').value = code;
+        }
+      } else {
+        selectRole('tv');
       }
     }
 
@@ -533,19 +557,15 @@
 
     // --- TV CONTROLLER ---
     function initTVPeer() {
-      // Generate unique short pairing code: MF-5LetterCode
-      const randomStr = Math.random().toString(36).substring(2, 7).toUpperCase();
-      pairingCode = 'MF-' + randomStr;
+      // Generate unique short pairing code: 5 numbers
+      const randomNum = Math.floor(10000 + Math.random() * 90000);
+      pairingCode = String(randomNum);
       
       document.getElementById('tv-room-code').innerText = pairingCode;
       
       // Update domain URL helper
       const hostUrl = `${window.location.origin}${window.location.pathname}`;
       document.getElementById('tv-domain-url').innerText = `Sito: ${window.location.host}`;
-
-      // Set pairing QR code
-      const pairUrl = `${hostUrl}?role=remote&code=${pairingCode}`;
-      document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(pairUrl)}`;
 
       // Initialize PeerJS on TV
       peer = new Peer(pairingCode);
