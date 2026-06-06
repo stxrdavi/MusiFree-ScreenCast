@@ -477,20 +477,11 @@
     function loadYTPlayer(videoId, autoPlay) {
       currentRequestedVideoId = videoId;
       if (ytPlayer) {
-        try {
-          ytPlayer.destroy();
-          ytPlayer = null;
-        } catch (e) {}
-      }
-
-      // Recreate the player container div (YT.Player replaces it with an iframe)
-      const container = document.getElementById('youtube-player');
-      if (container && container.tagName === 'IFRAME') {
-        const newDiv = document.createElement('div');
-        newDiv.id = 'youtube-player';
-        newDiv.className = 'absolute inset-0 w-full h-full object-cover opacity-0 pointer-events-none';
-        newDiv.style.zIndex = '1';
-        container.parentNode.replaceChild(newDiv, container);
+        ytPlayer.loadVideoById(videoId);
+        if (!autoPlay) {
+          ytPlayer.pauseVideo();
+        }
+        return;
       }
 
       ytPlayer = new YT.Player('youtube-player', {
