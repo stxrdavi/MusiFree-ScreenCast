@@ -230,7 +230,14 @@
   <main class="flex-1 w-full flex flex-col relative z-10">
     
     <!-- TV VIEW -->
-    <div id="view-tv" class="flex-1 flex flex-col p-8 h-screen overflow-hidden">
+    <div id="view-tv" class="flex-1 flex flex-col p-8 h-screen overflow-hidden relative">
+      
+      <!-- AD POPUP -->
+      <div id="tv-ad-popup" class="hidden absolute top-8 left-1/2 -translate-x-1/2 z-50 glass-panel px-6 py-3 rounded-full flex items-center gap-3 border border-yellow-500/30 bg-yellow-500/10 shadow-lg shadow-yellow-500/20 backdrop-blur-xl transition-all duration-300">
+        <div class="w-2 h-2 rounded-full bg-yellow-500 animate-ping"></div>
+        <span class="text-sm font-bold text-yellow-500 tracking-wide">Pubblicità in riproduzione...</span>
+      </div>
+
       <!-- TV Header -->
       <div class="flex justify-between items-center w-full mb-6 z-10">
         <div class="flex items-center gap-3">
@@ -465,7 +472,10 @@
       }
     }
 
+    let currentRequestedVideoId = null;
+
     function loadYTPlayer(videoId, autoPlay) {
+      currentRequestedVideoId = videoId;
       if (ytPlayer) {
         try {
           ytPlayer.destroy();
@@ -510,6 +520,32 @@
             const state = event.data;
             const playing = (state === YT.PlayerState.PLAYING);
             isPlaying = playing;
+            
+            // Ad Detection: if the currently playing video ID doesn't match our requested ID, it's an ad.
+            // Also if duration is unusually short (< 60s) for a song that we know is longer, but video_id check is safer.
+            const currentVideoData = ytPlayer.getVideoData();
+            const isAd = currentVideoData && currentVideoData.video_id && currentVideoData.video_id !== currentRequestedVideoId;
+            
+            const adPopup = document.getElementById('tv-ad-popup');
+            const ytContainer = document.getElementById('youtube-player');
+            
+            if (isAd && playing) {
+              // Show Ad Popup
+              if (adPopup) adPopup.classList.remove('hidden');
+              // Make iframe visible and clickable so user can click "Skip Ad"
+              if (ytContainer) {
+                ytContainer.classList.remove('opacity-0', 'pointer-events-none');
+                ytContainer.classList.add('opacity-100', 'pointer-events-auto', 'z-50');
+              }
+            } else if (playing) {
+              // Hide Ad Popup
+              if (adPopup) adPopup.classList.add('hidden');
+              // Hide iframe again
+              if (ytContainer) {
+                ytContainer.classList.add('opacity-0', 'pointer-events-none');
+                ytContainer.classList.remove('opacity-100', 'pointer-events-auto', 'z-50');
+              }
+            }
             
             // Notify Remote about state change
             if (conn) {
