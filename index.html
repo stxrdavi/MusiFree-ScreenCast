@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MusiFree TV - Specchia lo Schermo & Music TV</title>
+  <meta name="description" content="Trasforma il tuo browser in una TV musicale con testi sincronizzati o specchia lo schermo del tuo telefono via WebRTC. Compatibile con GitHub Pages.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📺</text></svg>">
+
+  <!-- CDNs for styling & icons & signaling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* Premium Design CSS variables */
+    :root {
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-display: 'Outfit', var(--font-sans);
+      --bg-color: 240 15% 4%;
+      --fg-color: 0 0% 98%;
+      --primary-color: 270 95% 65%;
+      --accent-color: 320 100% 65%;
+      
+      --glass-bg: rgba(18, 18, 24, 0.45);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-hover: rgba(255, 255, 255, 0.12);
+      --glass-card: rgba(20, 20, 28, 0.6);
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: hsl(var(--bg-color));
+      color: hsl(var(--fg-color));
+      overflow-x: hidden;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Ambient Background Glow */
+    .ambient-bg-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: -2;
+      overflow: hidden;
+      background-color: #08080c;
+      filter: blur(80px);
+      pointer-events: none;
+    }
+
+    .ambient-glow-ball {
+      position: absolute;
+      border-radius: 50%;
+      mix-blend-mode: screen;
+      opacity: 0.2;
+    }
+
+    @keyframes ambientGlow {
+      0% { transform: translate(0px, 0px) scale(1) rotate(0deg); }
+      33% { transform: translate(30px, -50px) scale(1.1) rotate(120deg); }
+      66% { transform: translate(-20px, 20px) scale(0.95) rotate(240deg); }
+      100% { transform: translate(0px, 0px) scale(1) rotate(360deg); }
+    }
+
+    .ball-1 {
+      width: 50vw;
+      height: 50vw;
+      background: radial-gradient(circle, hsl(var(--primary-color)) 0%, rgba(0,0,0,0) 70%);
+      top: -10%;
+      left: -10%;
+      animation: ambientGlow 25s infinite alternate ease-in-out;
+    }
+
+    .ball-2 {
+      width: 45vw;
+      height: 45vw;
+      background: radial-gradient(circle, hsl(var(--accent-color)) 0%, rgba(0,0,0,0) 70%);
+      bottom: -10%;
+      right: -10%;
+      animation: ambientGlow 30s infinite alternate-reverse ease-in-out;
+    }
+
+    /* Blurred Background Art */
+    .blurred-album-art {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: -1;
+      background-size: cover;
+      background-position: center;
+      filter: blur(50px) brightness(0.3) saturate(1.3);
+      transform: scale(1.1);
+      transition: background-image 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .blurred-album-art.active {
+      opacity: 1;
+    }
+
+    /* Glassmorphism Styles */
+    .glass-panel {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+    }
+
+    .glass-card {
+      background: var(--glass-card);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .glass-input {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: white;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .glass-input:focus {
+      border-color: hsl(var(--primary-color));
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.25);
+    }
+
+    .glass-button {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: white;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-weight: 600;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .glass-button:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: scale(1.02);
+    }
+
+    .glass-button.primary {
+      background: linear-gradient(135deg, hsl(var(--primary-color)) 0%, hsl(var(--accent-color)) 100%);
+      border: none;
+      box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+    }
+
+    .glass-button.primary:hover:not(:disabled) {
+      filter: brightness(1.15);
+      box-shadow: 0 6px 20px rgba(168, 85, 247, 0.5);
+    }
+
+    /* Synced Lyrics Scroll Pane */
+    .lyrics-container {
+      overflow-y: scroll;
+      scroll-behavior: smooth;
+      height: 100%;
+      padding: 40vh 0;
+    }
+
+    .lyrics-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    .lyric-line {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      font-weight: 700;
+      line-height: 1.4;
+      padding: 12px 18px;
+      color: rgba(255, 255, 255, 0.3);
+      transform-origin: left center;
+      transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .lyric-line.active {
+      color: #ffffff;
+      font-size: 3.2rem;
+      font-weight: 800;
+      filter: drop-shadow(0 0 15px rgba(168, 85, 247, 0.5));
+      text-shadow: 0 0 15px rgba(168, 85, 247, 0.45);
+      padding-left: 24px;
+    }
+
+    .lyric-line.past {
+      color: rgba(255, 255, 255, 0.15);
+      font-size: 1.8rem;
+      font-weight: 600;
+    }
+
+    .lyric-line.future {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Album art card on TV */
+    .album-art-tv {
+      width: 100%;
+      max-width: 380px;
+      aspect-ratio: 1;
+      margin: 0 auto;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, hsl(var(--primary-color)) 0%, hsl(var(--accent-color)) 100%);
+      border-radius: 4px;
+      width: 0%;
+      transition: width 0.1s linear;
+    }
+  </style>
+</head>
+<body class="flex flex-col min-height-screen">
+
+  <!-- Dynamic ambient background -->
+  <div class="ambient-bg-container">
+    <div class="ambient-glow-ball ball-1"></div>
+    <div class="ambient-glow-ball ball-2"></div>
+  </div>
+  <div id="tv-blur-bg" class="blurred-album-art"></div>
+
+  <!-- MAIN WRAPPER -->
+  <main class="flex-1 w-full flex flex-col relative z-10">
+    
+    <!-- 1. LANDING/ROLE SELECTOR -->
+    <div id="view-landing" class="flex-1 flex items-center justify-center p-6">
+      <div class="glass-card p-10 max-w-md w-full text-center">
+        <h1 class="font-display font-extrabold text-4xl mb-3 tracking-tight bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent">MusiFree TV</h1>
+        <p class="text-sm text-gray-400 mb-8">Trasforma il tuo browser in una TV musicale con testi o specchia lo schermo con WebRTC. Nessun server necessario.</p>
+        
+        <div class="flex flex-col gap-4">
+          <button onclick="selectRole('tv')" class="glass-button primary py-4 px-6 text-lg">
+            <i data-lucide="tv"></i> Apri Schermo TV
+          </button>
+          
+          <button onclick="selectRole('remote')" class="glass-button py-4 px-6 text-lg">
+            <i data-lucide="smartphone"></i> Apri Telecomando
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. TV VIEW -->
+    <div id="view-tv" class="hidden flex-1 flex flex-col p-8 h-screen overflow-hidden">
+      <!-- TV Header -->
+      <div class="flex justify-between items-center w-full mb-6 z-10">
+        <div class="flex items-center gap-3">
+          <div id="tv-status-dot" class="w-3.5 h-3.5 rounded-full bg-gray-500 animate-pulse"></div>
+          <span id="tv-status-text" class="text-xs font-semibold tracking-wider text-gray-400">CONNESSIONE PEER...</span>
+        </div>
+        <div class="flex gap-4">
+          <button onclick="toggleFullscreen()" class="glass-button p-2.5 rounded-full">
+            <i data-lucide="maximize" id="fs-icon"></i>
+          </button>
+          <button onclick="goBack()" class="glass-button px-4 py-1.5 text-xs">Esci</button>
+        </div>
+      </div>
+
+      <!-- TV Wait Screen -->
+      <div id="tv-wait-screen" class="flex-1 flex items-center justify-center z-10">
+        <div class="glass-card p-8 max-w-lg w-full text-center flex flex-col items-center">
+          <i data-lucide="cast" class="text-purple-400 w-16 h-16 mb-5 animate-pulse"></i>
+          <h2 class="font-display text-2xl font-bold mb-3">Configura MusiFree TV</h2>
+          <p class="text-xs text-gray-400 mb-6">Inquadra il codice QR con il telefono o visita il sito inserendo questo codice per associare i dispositivi.</p>
+          
+          <div class="flex flex-col md:flex-row gap-6 items-center justify-center bg-black/30 p-5 rounded-2xl border border-white/5 w-full">
+            <!-- Pairing QR code container -->
+            <div id="qr-container" class="bg-white p-2 rounded-xl">
+              <img id="qr-img" src="" alt="QR Code" class="w-36 h-36">
+            </div>
+            
+            <div class="text-left">
+              <span class="text-[10px] text-gray-500 block uppercase tracking-wider mb-1">Codice Stanza</span>
+              <span id="tv-room-code" class="font-display text-4xl font-extrabold text-white tracking-widest block">MF-----</span>
+              <span id="tv-domain-url" class="text-[10px] text-purple-400 mt-2 block break-all"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TV Mirror Screen View (WebRTC) -->
+      <div id="tv-mirror-screen" class="hidden flex-1 flex justify-center items-center relative rounded-2xl overflow-hidden glass-panel border border-white/5">
+        <video id="tv-mirror-video" autoplay playsinline class="w-full h-full object-contain"></video>
+        <div class="absolute top-4 left-4 glass-panel px-4 py-1.5 rounded-full text-[10px] flex items-center gap-2">
+          <div class="w-2 h-2 rounded-full bg-red-500 animate-ping"></div>
+          Specchio Schermo Attivo
+        </div>
+      </div>
+
+      <!-- TV Smart Player View -->
+      <div id="tv-player-screen" class="hidden flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center h-full">
+        <!-- Left panel: Art Cover & hidden YT player -->
+        <div class="lg:col-span-5 flex flex-col gap-6 justify-center">
+          <div class="relative album-art-tv">
+            <!-- Hidden YouTube Player Iframe -->
+            <div id="youtube-player" class="absolute inset-0 w-full h-full object-cover opacity-0 pointer-events-none" style="z-index: 1;"></div>
+            <!-- Art thumbnail -->
+            <img id="tv-track-cover" src="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22></svg>" alt="" class="w-full h-full object-cover">
+          </div>
+          
+          <div class="text-left px-4">
+            <h2 id="tv-track-title" class="font-display text-2xl font-extrabold text-white mb-1 truncate">Titolo Canzone</h2>
+            <p id="tv-track-artist" class="text-purple-400 text-md font-medium truncate">Artista</p>
+            
+            <div class="flex items-center gap-4 mt-6">
+              <span id="tv-time-current" class="text-[10px] text-gray-400">00:00</span>
+              <div class="progress-bar-container flex-1">
+                <div id="tv-progress-fill" class="progress-bar-fill"></div>
+              </div>
+              <span id="tv-time-duration" class="text-[10px] text-gray-400">00:00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right panel: scroll lyrics -->
+        <div class="lg:col-span-7 glass-panel rounded-2xl h-[78vh] p-6 relative overflow-hidden">
+          <div id="tv-lyrics-list" class="lyrics-container">
+            <!-- Dynamic lyrics load here -->
+            <div class="flex h-full items-center justify-center text-gray-500 font-display text-xl">
+              Casting... in attesa di brani
+            </div>
+          </div>
+          <!-- Edge Faders -->
+          <div class="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-[#0a0a0f] to-transparent pointer-events-none"></div>
+          <div class="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-[#0a0a0f] to-transparent pointer-events-none"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. REMOTE CONTROLLER VIEW -->
+    <div id="view-remote" class="hidden flex-1 flex flex-col max-w-md w-full mx-auto p-4 h-screen overflow-hidden">
+      <!-- Remote Header -->
+      <div class="flex justify-between items-center py-3 border-b border-white/5 mb-4 shrink-0">
+        <h2 class="font-display font-bold text-lg flex items-center gap-2">
+          <i data-lucide="smartphone" class="text-purple-400 w-5 h-5"></i>
+          Telecomando
+        </h2>
+        <button onclick="goBack()" class="glass-button text-xs py-1 px-3">Indietro</button>
+      </div>
+
+      <!-- Remote Pairing Form -->
+      <div id="remote-join-screen" class="flex-grow flex items-center justify-center">
+        <div class="glass-card p-6 w-full">
+          <h3 class="font-display text-md font-bold mb-2">Connettiti alla TV</h3>
+          <p class="text-[10px] text-gray-400 mb-6">Inserisci il codice di 5 lettere mostrato sulla TV.</p>
+          
+          <div class="flex flex-col gap-4">
+            <input id="remote-code-input" type="text" placeholder="Codice (es. MF-ABCDE)" class="glass-input text-center text-lg tracking-widest font-mono py-3 font-bold uppercase">
+            <div id="remote-error" class="hidden text-red-400 text-[10px] flex items-center gap-1">
+              <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
+              <span id="remote-error-text">Codice non valido</span>
+            </div>
+            <button onclick="connectToTV()" class="glass-button primary py-3 font-semibold text-sm">Connetti Stanza</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Remote Controls Panel -->
+      <div id="remote-controls-screen" class="hidden flex-grow flex flex-col gap-5 overflow-y-auto pb-6">
+        <!-- Paired Status Bar -->
+        <div class="glass-panel p-3.5 rounded-xl flex justify-between items-center text-[10px]">
+          <span class="flex items-center gap-2 font-medium">
+            <i data-lucide="wifi" class="text-green-400 w-4 h-4 animate-pulse"></i>
+            Connesso alla TV: <strong id="remote-paired-code" class="text-purple-300">MF-XXXX</strong>
+          </span>
+          <span class="px-2 py-0.5 rounded bg-green-500/10 text-green-400 font-bold uppercase tracking-wider">Online</span>
+        </div>
+
+        <!-- WebRTC Mirror Toggle Card -->
+        <div class="glass-card p-4 shrink-0">
+          <h4 class="font-semibold text-xs mb-2">Condividi Schermo</h4>
+          <p class="text-[10px] text-gray-400 mb-3">Specchia la scheda, la finestra o l'intero schermo alla TV in tempo reale.</p>
+          
+          <button id="mirror-btn" onclick="toggleScreenShare()" class="glass-button primary w-full text-xs py-2.5">
+            <i data-lucide="cast" class="w-4 h-4"></i> Avvia Trasmissione Schermo
+          </button>
+        </div>
+
+        <!-- Now Playing widget -->
+        <div id="remote-now-playing" class="hidden glass-card p-4 flex flex-col gap-3.5 border-l-4 border-l-purple-500 shrink-0">
+          <div class="flex gap-3 items-center">
+            <img id="remote-nowplaying-cover" src="" alt="" class="w-12 h-12 rounded-lg object-cover border border-white/5">
+            <div class="overflow-hidden flex-1">
+              <h5 id="remote-nowplaying-title" class="font-semibold text-xs text-white truncate">Nessun brano in riproduzione</h5>
+              <p id="remote-nowplaying-artist" class="text-[10px] text-gray-400 truncate">Nessuno</p>
+            </div>
+          </div>
+          
+          <!-- Progress slider -->
+          <div class="flex flex-col gap-1">
+            <input id="remote-progress-range" type="range" min="0" max="100" value="0" oninput="remoteSeek(this.value)" class="w-full accent-purple-500 cursor-pointer h-1 rounded-lg">
+            <div class="flex justify-between text-[8px] text-gray-500 font-mono">
+              <span id="remote-progress-time">00:00</span>
+              <span id="remote-duration-time">00:00</span>
+            </div>
+          </div>
+
+          <!-- Controls row -->
+          <div class="flex justify-center items-center gap-6">
+            <button onclick="remoteSkip(-15)" class="glass-button p-2.5 rounded-full"><i data-lucide="skip-back" class="w-4 h-4"></i></button>
+            <button id="remote-play-btn" onclick="remoteTogglePlay()" class="glass-button primary p-3 rounded-full"><i data-lucide="play" class="w-5 h-5" id="remote-play-icon"></i></button>
+            <button onclick="remoteSkip(15)" class="glass-button p-2.5 rounded-full"><i data-lucide="skip-forward" class="w-4 h-4"></i></button>
+          </div>
+        </div>
+
+        <!-- Search Songs & Cast -->
+        <div class="flex flex-col gap-3 flex-grow min-h-0">
+          <h4 class="font-semibold text-xs">Testi & Brani</h4>
+          <form onsubmit="searchSongs(event)" class="flex gap-2 shrink-0">
+            <input id="search-input" type="text" placeholder="Titolo canzone, artista..." class="glass-input flex-1 px-4 py-2 text-sm">
+            <button type="submit" class="glass-button primary p-2.5"><i data-lucide="search" class="w-4 h-4"></i></button>
+          </form>
+
+          <div id="search-results-list" class="flex flex-col gap-2 overflow-y-auto flex-grow max-h-[220px]">
+            <!-- Results load here -->
+            <div class="text-center py-6 text-gray-500 text-xs">Cerca canzoni per caricare testi e video</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // --- STATE MANAGEMENT ---
+    let myRole = null;
+    let peer = null;
+    let conn = null; // PeerJS DataConnection
+    let callInstance = null; // PeerJS MediaCall
+    let localStream = null; // Screen capture stream
+    let isMirroring = false;
+    let pairingCode = '';
+
+    // Playback States
+    let currentTrack = null;
+    let isPlaying = false;
+    let ytPlayer = null;
+    let progressInterval = null;
+    let lyricsLines = [];
+    let currentLyricIndex = -1;
+
+    // --- INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      checkUrlParams();
+    });
+
+    // Check url params for direct pairing
+    function checkUrlParams() {
+      const params = new URLSearchParams(window.location.search);
+      const role = params.get('role');
+      const code = params.get('code');
+      
+      if (role === 'remote' && code) {
+        selectRole('remote');
+        document.getElementById('remote-code-input').value = code;
+      }
+    }
+
+    // Role Router UI Switcher
+    function selectRole(role) {
+      myRole = role;
+      document.getElementById('view-landing').classList.add('hidden');
+      
+      if (role === 'tv') {
+        document.getElementById('view-tv').classList.remove('hidden');
+        initTVPeer();
+      } else {
+        document.getElementById('view-remote').classList.remove('hidden');
+        initRemotePeer();
+      }
+    }
+
+    function goBack() {
+      if (peer) {
+        peer.destroy();
+        peer = null;
+      }
+      if (localStream) {
+        localStream.getTracks().forEach(t => t.stop());
+        localStream = null;
+      }
+      stopMirroringTV();
+      stopTimeUpdates();
+      
+      myRole = null;
+      conn = null;
+      callInstance = null;
+      isMirroring = false;
+      currentTrack = null;
+      isPlaying = false;
+      
+      document.getElementById('view-tv').classList.add('hidden');
+      document.getElementById('view-remote').classList.add('hidden');
+      document.getElementById('view-landing').classList.remove('hidden');
+      
+      // Clear URL params
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    // --- TV CONTROLLER ---
+    function initTVPeer() {
+      // Generate unique short pairing code: MF-5LetterCode
+      const randomStr = Math.random().toString(36).substring(2, 7).toUpperCase();
+      pairingCode = 'MF-' + randomStr;
+      
+      document.getElementById('tv-room-code').innerText = pairingCode;
+      
+      // Update domain URL helper
+      const hostUrl = `${window.location.origin}${window.location.pathname}`;
+      document.getElementById('tv-domain-url').innerText = `Sito: ${window.location.host}`;
+
+      // Set pairing QR code
+      const pairUrl = `${hostUrl}?role=remote&code=${pairingCode}`;
+      document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(pairUrl)}`;
+
+      // Initialize PeerJS on TV
+      peer = new Peer(pairingCode);
+
+      peer.on('open', (id) => {
+        document.getElementById('tv-status-dot').className = "w-3.5 h-3.5 rounded-full bg-yellow-500 animate-pulse";
+        document.getElementById('tv-status-text').innerText = "IN ATTESA DI CONTROLLER";
+        console.log('TV Peer opened with ID:', id);
+      });
+
+      peer.on('connection', (connection) => {
+        conn = connection;
+        handleTVConnection();
+      });
+
+      peer.on('call', (call) => {
+        callInstance = call;
+        call.answer();
+        
+        call.on('stream', (stream) => {
+          showTVMirror(stream);
+        });
+      });
+
+      peer.on('error', (err) => {
+        console.error('TV Peer error:', err);
+        document.getElementById('tv-status-dot').className = "w-3.5 h-3.5 rounded-full bg-red-500";
+        document.getElementById('tv-status-text').innerText = "ERRORE PEER CONNECTION";
+      });
+    }
+
+    function handleTVConnection() {
+      document.getElementById('tv-status-dot').className = "w-3.5 h-3.5 rounded-full bg-green-500";
+      document.getElementById('tv-status-text').innerText = "TELECOMANDO ABBINATO";
+      document.getElementById('tv-wait-screen').classList.add('hidden');
+      document.getElementById('tv-player-screen').classList.remove('hidden');
+
+      // Request fullscreen on connection
+      requestFullscreen();
+
+      // Listen for control commands from remote
+      conn.on('data', (data) => {
+        if (data.type === 'state-sync') {
+          handleCastedMedia(data.state);
+        } else if (data.type === 'stop-mirroring') {
+          stopMirroringTV();
+        }
+      });
+    }
+
+    // YouTube API script loader callback
+    if (!window.YT) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    }
+
+    // Handles playing media sent from remote
+    function handleCastedMedia(state) {
+      if (isMirroring) stopMirroringTV();
+
+      const isNewTrack = !currentTrack || currentTrack.id !== state.track.id;
+      currentTrack = state.track;
+      isPlaying = state.isPlaying;
+
+      if (isNewTrack) {
+        document.getElementById('tv-track-title').innerText = currentTrack.title;
+        document.getElementById('tv-track-artist').innerText = currentTrack.artist;
+        document.getElementById('tv-track-cover').src = currentTrack.thumbnailURL;
+        
+        // Dynamic Blur Ambient Background
+        const bgBlur = document.getElementById('tv-blur-bg');
+        bgBlur.style.backgroundImage = `url(${currentTrack.thumbnailURL})`;
+        bgBlur.classList.add('active');
+
+        // Reset progress & lyrics
+        document.getElementById('tv-progress-fill').style.width = '0%';
+        document.getElementById('tv-time-current').innerText = '00:00';
+        document.getElementById('tv-time-duration').innerText = '00:00';
+        
+        // Load lyrics
+        setTVLyrics(currentTrack.lyricsType, currentTrack.lyrics);
+
+        // Load YouTube Player
+        loadYTPlayer(currentTrack.id, isPlaying);
+      } else {
+        // Sync Player
+        if (ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
+          if (isPlaying) {
+            ytPlayer.playVideo();
+          } else {
+            ytPlayer.pauseVideo();
+          }
+
+          // Seek sync
+          const currentTvTime = ytPlayer.getCurrentTime() || 0;
+          if (Math.abs(currentTvTime - state.progress) > 2.5) {
+            ytPlayer.seekTo(state.progress, true);
+          }
+        }
+      }
+    }
+
+    function loadYTPlayer(videoId, autoPlay) {
+      if (ytPlayer) {
+        try {
+          ytPlayer.destroy();
+          ytPlayer = null;
+        } catch (e) {}
+      }
+
+      ytPlayer = new YT.Player('youtube-player', {
+        height: '100%',
+        width: '100%',
+        videoId: videoId,
+        playerVars: {
+          'autoplay': autoPlay ? 1 : 0,
+          'controls': 0,
+          'disablekb': 1,
+          'rel': 0,
+          'modestbranding': 1,
+          'iv_load_policy': 3,
+          'fs': 0,
+          'cc_load_policy': 0,
+          'playsinline': 1
+        },
+        events: {
+          'onReady': (event) => {
+            const dur = event.target.getDuration();
+            document.getElementById('tv-time-duration').innerText = formatTime(dur);
+            if (autoPlay) event.target.playVideo();
+          },
+          'onStateChange': (event) => {
+            const state = event.data;
+            const playing = (state === YT.PlayerState.PLAYING);
+            isPlaying = playing;
+            
+            // Notify Remote about state change
+            if (conn) {
+              conn.send({ type: 'tv-state-change', isPlaying: playing });
+            }
+
+            if (playing) {
+              startTimeUpdates();
+            } else {
+              stopTimeUpdates();
+            }
+          }
+        }
+      });
+    }
+
+    // Lyrics loader
+    function setTVLyrics(type, rawLyrics) {
+      const container = document.getElementById('tv-lyrics-list');
+      container.innerHTML = '';
+      currentLyricIndex = -1;
+
+      if (type === 'notFound' || !rawLyrics) {
+        lyricsLines = [];
+        container.innerHTML = `<div class="flex h-full items-center justify-center text-gray-500 font-display text-2xl">Testo non disponibile</div>`;
+        return;
+      }
+
+      if (type === 'synced') {
+        lyricsLines = parseLrc(rawLyrics);
+      } else {
+        lyricsLines = parsePlain(rawLyrics);
+      }
+
+      lyricsLines.forEach((line, idx) => {
+        const div = document.createElement('div');
+        div.className = 'lyric-line future';
+        div.setAttribute('data-index', idx);
+        div.innerText = line.text;
+        container.appendChild(div);
+      });
+    }
+
+    // Scroll Polling
+    function startTimeUpdates() {
+      stopTimeUpdates();
+      progressInterval = setInterval(() => {
+        if (ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
+          const current = ytPlayer.getCurrentTime();
+          const duration = ytPlayer.getDuration() || 0;
+          
+          document.getElementById('tv-time-current').innerText = formatTime(current);
+          const percent = duration > 0 ? (current / duration) * 100 : 0;
+          document.getElementById('tv-progress-fill').style.width = `${percent}%`;
+
+          // Sync Time updates to Remote
+          if (conn) {
+            conn.send({ type: 'tv-time-sync', currentTime: current, duration: duration });
+          }
+
+          // Sync lyrics scrolling
+          syncLyrics(current);
+        }
+      }, 250);
+    }
+
+    function stopTimeUpdates() {
+      if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+      }
+    }
+
+    function syncLyrics(time) {
+      if (lyricsLines.length === 0) return;
+
+      let activeIdx = -1;
+      for (let i = 0; i < lyricsLines.length; i++) {
+        if (lyricsLines[i].timestamp <= time) {
+          activeIdx = i;
+        } else {
+          break;
+        }
+      }
+
+      if (activeIdx !== currentLyricIndex) {
+        currentLyricIndex = activeIdx;
+        
+        // Reset classes
+        const lines = document.querySelectorAll('.lyric-line');
+        lines.forEach((line, idx) => {
+          line.classList.remove('active', 'past', 'future');
+          if (idx === currentLyricIndex) {
+            line.classList.add('active');
+            
+            // Scroll to center
+            line.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center'
+            });
+          } else if (idx < currentLyricIndex) {
+            line.classList.add('past');
+          } else {
+            line.classList.add('future');
+          }
+        });
+      }
+    }
+
+    function showTVMirror(stream) {
+      isMirroring = true;
+      document.getElementById('tv-player-screen').classList.add('hidden');
+      document.getElementById('tv-mirror-screen').classList.remove('hidden');
+
+      const video = document.getElementById('tv-mirror-video');
+      video.srcObject = stream;
+      
+      // Auto full screen
+      requestFullscreen();
+    }
+
+    function stopMirroringTV() {
+      isMirroring = false;
+      document.getElementById('tv-mirror-screen').classList.add('hidden');
+      document.getElementById('tv-player-screen').classList.remove('hidden');
+      
+      const video = document.getElementById('tv-mirror-video');
+      video.srcObject = null;
+      
+      if (callInstance) {
+        callInstance.close();
+        callInstance = null;
+      }
+    }
+
+    // Fullscreen Helpers
+    function requestFullscreen() {
+      const doc = document.documentElement;
+      if (doc.requestFullscreen) {
+        doc.requestFullscreen().catch(() => {});
+      }
+    }
+
+    function toggleFullscreen() {
+      const icon = document.getElementById('fs-icon');
+      if (document.fullscreenElement) {
+        document.exitFullscreen().then(() => {
+          icon.setAttribute('data-lucide', 'maximize');
+          lucide.createIcons();
+        });
+      } else {
+        document.documentElement.requestFullscreen().then(() => {
+          icon.setAttribute('data-lucide', 'minimize');
+          lucide.createIcons();
+        }).catch(() => {});
+      }
+    }
+
+    // --- REMOTE CONTROLLER CONTROLLER ---
+    function initRemotePeer() {
+      // Connect to public PeerJS cloud server with random ID
+      peer = new Peer();
+      
+      peer.on('error', (err) => {
+        console.error('Remote Peer error:', err);
+      });
+    }
+
+    function connectToTV() {
+      const code = document.getElementById('remote-code-input').value.trim().toUpperCase();
+      if (!code) return;
+
+      document.getElementById('remote-error').classList.add('hidden');
+
+      // Establish PeerJS connection
+      conn = peer.connect(code);
+      
+      conn.on('open', () => {
+        setIsRemoteConnected(code);
+      });
+
+      conn.on('data', (data) => {
+        if (data.type === 'tv-time-sync') {
+          updateRemoteProgress(data.currentTime, data.duration);
+        } else if (data.type === 'tv-state-change') {
+          updateRemotePlayState(data.isPlaying);
+        }
+      });
+
+      conn.on('error', (err) => {
+        console.error('Connection error:', err);
+        showRemoteError('Impossibile connettersi. Verifica il codice.');
+      });
+      
+      // Handle server closed conn
+      conn.on('close', () => {
+        setIsRemoteDisconnected();
+      });
+    }
+
+    function setIsRemoteConnected(code) {
+      document.getElementById('remote-join-screen').classList.add('hidden');
+      document.getElementById('remote-controls-screen').classList.remove('hidden');
+      document.getElementById('remote-paired-code').innerText = code;
+      pairingCode = code;
+    }
+
+    function setIsRemoteDisconnected() {
+      document.getElementById('remote-controls-screen').classList.add('hidden');
+      document.getElementById('remote-join-screen').classList.remove('hidden');
+      showRemoteError('TV disconnessa.');
+      stopScreenShare();
+    }
+
+    function showRemoteError(msg) {
+      const errorDiv = document.getElementById('remote-error');
+      const errorText = document.getElementById('remote-error-text');
+      errorText.innerText = msg;
+      errorDiv.classList.remove('hidden');
+    }
+
+    // WebRTC Screen Capture on Remote
+    async function toggleScreenShare() {
+      if (isMirroring) {
+        stopScreenShare();
+        return;
+      }
+
+      try {
+        localStream = await navigator.mediaDevices.getDisplayMedia({
+          video: { width: 1920, height: 1080, frameRate: 30 },
+          audio: true
+        });
+
+        isMirroring = true;
+        document.getElementById('mirror-btn').innerHTML = `<i data-lucide="x" class="w-4 h-4"></i> Interrompi Trasmissione`;
+        lucide.createIcons();
+
+        // Establish PeerJS media call
+        callInstance = peer.call(pairingCode, localStream);
+
+        // Detect stop sharing from native browser bar
+        localStream.getVideoTracks()[0].onended = () => {
+          stopScreenShare();
+        };
+
+      } catch (err) {
+        console.error('Display capture failed:', err);
+        isMirroring = false;
+      }
+    }
+
+    function stopScreenShare() {
+      isMirroring = false;
+      document.getElementById('mirror-btn').innerHTML = `<i data-lucide="cast" class="w-4 h-4"></i> Avvia Trasmissione Schermo`;
+      lucide.createIcons();
+
+      if (localStream) {
+        localStream.getTracks().forEach(t => t.stop());
+        localStream = null;
+      }
+      if (callInstance) {
+        callInstance.close();
+        callInstance = null;
+      }
+      if (conn) {
+        conn.send({ type: 'stop-mirroring' });
+      }
+    }
+
+    // Remote Track Search (queries LRCLIB directly)
+    async function searchSongs(event) {
+      event.preventDefault();
+      const q = document.getElementById('search-input').value.trim();
+      if (!q) return;
+
+      const resultsList = document.getElementById('search-results-list');
+      resultsList.innerHTML = `<div class="flex justify-center py-6"><i data-lucide="loader" class="animate-spin text-purple-400 w-6 h-6"></i></div>`;
+      lucide.createIcons();
+
+      try {
+        // Query LRCLIB search API directly
+        const res = await fetch(`https://lrclib.net/api/search?q=${encodeURIComponent(q)}`);
+        const data = await res.json();
+        
+        resultsList.innerHTML = '';
+        if (data.length === 0) {
+          resultsList.innerHTML = `<div class="text-center py-6 text-gray-500 text-xs">Nessun brano trovato</div>`;
+          return;
+        }
+
+        data.slice(0, 8).forEach(item => {
+          const btn = document.createElement('button');
+          btn.className = 'glass-panel p-3 rounded-xl flex gap-3 text-left w-full items-center transition hover:border-white/20';
+          btn.onclick = () => castSongDialog(item);
+          
+          const coverUrl = item.albumName ? `https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=80&q=80` : ''; // placeholder cover art
+          
+          btn.innerHTML = `
+            <div class="w-10 h-10 rounded bg-purple-900/30 flex items-center justify-center shrink-0 border border-white/5">
+              <i data-lucide="music" class="w-5 h-5 text-purple-400"></i>
+            </div>
+            <div class="overflow-hidden flex-1">
+              <span class="font-semibold text-white text-xs block truncate">${item.trackName}</span>
+              <span class="text-gray-400 text-[10px] block truncate">${item.artistName} • ${item.albumName || 'Singolo'}</span>
+            </div>
+          `;
+          resultsList.appendChild(btn);
+        });
+        lucide.createIcons();
+
+      } catch (err) {
+        console.error('Search error:', err);
+        resultsList.innerHTML = `<div class="text-center py-6 text-red-400 text-xs">Errore nel caricamento dei brani</div>`;
+      }
+    }
+
+    // Prompts user for YouTube URL when song is casted
+    function castSongDialog(track) {
+      const ytUrl = prompt(`Inserisci il link del video di YouTube o l'ID del video per:\n"${track.trackName} - ${track.artistName}":`, '');
+      if (ytUrl === null) return;
+      
+      const videoId = getYoutubeId(ytUrl.trim());
+      if (!videoId) {
+        alert('ID Video non valido.');
+        return;
+      }
+
+      // Prepare lyrics payload
+      let lyricsType = 'notFound';
+      let lyrics = '';
+
+      if (track.syncedLyrics) {
+        lyricsType = 'synced';
+        lyrics = track.syncedLyrics;
+      } else if (track.plainLyrics) {
+        lyricsType = 'plain';
+        lyrics = track.plainLyrics;
+      }
+
+      const thumbnailURL = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+
+      const selectedTrack = {
+        id: videoId,
+        title: track.trackName,
+        artist: track.artistName,
+        thumbnailURL: thumbnailURL,
+        lyricsType: lyricsType,
+        lyrics: lyrics
+      };
+
+      // Set Remote Widget
+      currentTrack = selectedTrack;
+      isPlaying = true;
+      
+      document.getElementById('remote-now-playing').classList.remove('hidden');
+      document.getElementById('remote-nowplaying-cover').src = selectedTrack.thumbnailURL;
+      document.getElementById('remote-nowplaying-title').innerText = selectedTrack.title;
+      document.getElementById('remote-nowplaying-artist').innerText = selectedTrack.artist;
+      document.getElementById('remote-play-icon').setAttribute('data-lucide', 'pause');
+      lucide.createIcons();
+
+      // Cast state sync to TV
+      if (conn) {
+        conn.send({
+          type: 'state-sync',
+          state: {
+            track: selectedTrack,
+            isPlaying: true,
+            progress: 0
+          }
+        });
+      }
+    }
+
+    // Playback sync from Remote
+    function remoteTogglePlay() {
+      if (!currentTrack) return;
+      isPlaying = !isPlaying;
+      
+      updateRemotePlayState(isPlaying);
+
+      if (conn) {
+        conn.send({
+          type: 'state-sync',
+          state: {
+            track: currentTrack,
+            isPlaying: isPlaying,
+            progress: parseFloat(document.getElementById('remote-progress-range').value)
+          }
+        });
+      }
+    }
+
+    function remoteSkip(amount) {
+      if (!currentTrack) return;
+      const range = document.getElementById('remote-progress-range');
+      let target = parseFloat(range.value) + amount;
+      target = Math.max(0, Math.min(target, parseFloat(range.max)));
+      
+      range.value = target;
+      
+      if (conn) {
+        conn.send({
+          type: 'state-sync',
+          state: {
+            track: currentTrack,
+            isPlaying: isPlaying,
+            progress: target
+          }
+        });
+      }
+    }
+
+    function remoteSeek(val) {
+      if (!currentTrack) return;
+      
+      if (conn) {
+        conn.send({
+          type: 'state-sync',
+          state: {
+            track: currentTrack,
+            isPlaying: isPlaying,
+            progress: parseFloat(val)
+          }
+        });
+      }
+    }
+
+    // Update Remote controls from TV feedback
+    function updateRemoteProgress(current, duration) {
+      document.getElementById('remote-progress-time').innerText = formatTime(current);
+      document.getElementById('remote-duration-time').innerText = formatTime(duration);
+      
+      const range = document.getElementById('remote-progress-range');
+      range.max = duration;
+      range.value = current;
+    }
+
+    function updateRemotePlayState(playing) {
+      isPlaying = playing;
+      const icon = document.getElementById('remote-play-icon');
+      icon.setAttribute('data-lucide', playing ? 'pause' : 'play');
+      lucide.createIcons();
+    }
+
+    // --- PARSING HELPERS ---
+    function parseLrc(lrcString) {
+      const lines = [];
+      const pattern = /\[(\d{2}):(\d{2})\.(\d{2,3})\]\s*(.*)/;
+      
+      const rawLines = lrcString.split('\n');
+      rawLines.forEach(line => {
+        const match = pattern.exec(line);
+        if (match) {
+          const min = parseInt(match[1]);
+          const sec = parseInt(match[2]);
+          const ms = parseInt(match[3]);
+          const text = match[4].trim();
+          
+          const timestamp = min * 60 + sec + ms / (match[3].length === 2 ? 100 : 1000);
+          if (text) {
+            lines.push({ timestamp, text });
+          }
+        }
+      });
+      return lines.sort((a, b) => a.timestamp - b.timestamp);
+    }
+
+    function parsePlain(text) {
+      return text.split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0)
+        .map((line, index) => ({
+          timestamp: index * 5.0,
+          text: line
+        }));
+    }
+
+    function getYoutubeId(url) {
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : url;
+    }
+
+    function formatTime(seconds) {
+      if (isNaN(seconds) || seconds === null) return '00:00';
+      const min = Math.floor(seconds / 60);
+      const sec = Math.floor(seconds % 60);
+      return `${min < 10 ? '0' + min : min}:${sec < 10 ? '0' + sec : sec}`;
+    }
+  </script>
+</body>
+</html>
