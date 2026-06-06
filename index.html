@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>MusiFree TV - Specchia lo Schermo & Music TV</title>
-  <meta name="description" content="Trasforma il tuo browser in una TV musicale con testi sincronizzati o specchia lo schermo del tuo telefono via WebRTC. Compatibile con GitHub Pages.">
+  <meta name="description" content="Trasforma il tuo browser in una TV musicale con testi sincronizzati o specchia lo schermo del tuo telefono via WebRTC.">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none'><defs><linearGradient id='g' x1='0%25' y1='100%25' x2='100%25' y2='0%25'><stop offset='0%25' stop-color='%232f60ff'/><stop offset='50%25' stop-color='%239d27ff'/><stop offset='100%25' stop-color='%23ff00ff'/></linearGradient></defs><circle cx='34' cy='63' r='12' fill='url(%23g)'/><circle cx='66' cy='57' r='12' fill='url(%23g)'/><path d='M 40 63 L 40 31 L 56 43 L 72 31 L 72 57' stroke='url(%23g)' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'/></svg>">
 
   <!-- CDNs for styling & icons & signaling -->
@@ -125,52 +125,6 @@
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .glass-input {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      color: white;
-      outline: none;
-      transition: all 0.2s ease;
-    }
-
-    .glass-input:focus {
-      border-color: hsl(var(--primary-color));
-      background: rgba(255, 255, 255, 0.08);
-      box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.25);
-    }
-
-    .glass-button {
-      background: rgba(255, 255, 255, 0.07);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      color: white;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      font-weight: 600;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .glass-button:hover:not(:disabled) {
-      background: rgba(255, 255, 255, 0.14);
-      border-color: rgba(255, 255, 255, 0.2);
-      transform: scale(1.02);
-    }
-
-    .glass-button.primary {
-      background: linear-gradient(135deg, hsl(var(--primary-color)) 0%, hsl(var(--accent-color)) 100%);
-      border: none;
-      box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
-    }
-
-    .glass-button.primary:hover:not(:disabled) {
-      filter: brightness(1.15);
-      box-shadow: 0 6px 20px rgba(168, 85, 247, 0.5);
-    }
-
     /* Synced Lyrics Scroll Pane */
     .lyrics-container {
       overflow-y: scroll;
@@ -241,9 +195,29 @@
       width: 0%;
       transition: width 0.1s linear;
     }
+
+    .glass-button {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: white;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-weight: 600;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .glass-button:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: scale(1.02);
+    }
   </style>
 </head>
-<body class="flex flex-col min-height-screen">
+<body class="flex flex-col min-h-screen">
 
   <!-- Dynamic ambient background -->
   <div class="ambient-bg-container">
@@ -255,40 +229,8 @@
   <!-- MAIN WRAPPER -->
   <main class="flex-1 w-full flex flex-col relative z-10">
     
-    <!-- 1. LANDING/ROLE SELECTOR -->
-    <div id="view-landing" class="flex-1 flex items-center justify-center p-6">
-      <div class="glass-card p-10 max-w-md w-full text-center flex flex-col items-center">
-        <div class="w-24 h-24 mb-6">
-          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
-            <defs>
-              <linearGradient id="logo-grad-landing" x1="0%" y1="100%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="#2f60ff" />
-                <stop offset="50%" stop-color="#9d27ff" />
-                <stop offset="100%" stop-color="#ff00ff" />
-              </linearGradient>
-            </defs>
-            <circle cx="34" cy="63" r="12" fill="url(#logo-grad-landing)" />
-            <circle cx="66" cy="57" r="12" fill="url(#logo-grad-landing)" />
-            <path d="M 40 63 L 40 31 L 56 43 L 72 31 L 72 57" stroke="url(#logo-grad-landing)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-          </svg>
-        </div>
-        <h1 class="font-display font-extrabold text-4xl mb-3 tracking-tight bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent">MusiFree TV</h1>
-        <p class="text-sm text-gray-400 mb-8">Trasforma il tuo browser in una TV musicale con testi o specchia lo schermo con WebRTC. Nessun server necessario.</p>
-        
-        <div class="flex flex-col gap-4">
-          <button onclick="selectRole('tv')" class="glass-button primary py-4 px-6 text-lg">
-            <i data-lucide="tv"></i> Apri Schermo TV
-          </button>
-          
-          <button onclick="selectRole('remote')" class="glass-button py-4 px-6 text-lg">
-            <i data-lucide="smartphone"></i> Apri Telecomando
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- 2. TV VIEW -->
-    <div id="view-tv" class="hidden flex-1 flex flex-col p-8 h-screen overflow-hidden">
+    <!-- TV VIEW -->
+    <div id="view-tv" class="flex-1 flex flex-col p-8 h-screen overflow-hidden">
       <!-- TV Header -->
       <div class="flex justify-between items-center w-full mb-6 z-10">
         <div class="flex items-center gap-3">
@@ -321,7 +263,7 @@
             </svg>
           </div>
           <h2 class="font-display text-2xl font-bold mb-3">Configura MusiFree TV</h2>
-          <p class="text-xs text-gray-400 mb-6">Apri il telecomando su un altro dispositivo ed inserisci questo codice numerico per associare i dispositivi.</p>
+          <p class="text-xs text-gray-400 mb-6">Usa l'app per inserire questo codice numerico e avviare la riproduzione sulla TV.</p>
           
           <div class="flex flex-col gap-4 items-center justify-center bg-black/30 p-6 rounded-2xl border border-white/5 w-full text-center">
             <span class="text-[10px] text-gray-500 block uppercase tracking-wider mb-1">Codice Stanza</span>
@@ -380,107 +322,13 @@
       </div>
     </div>
 
-    <!-- 3. REMOTE CONTROLLER VIEW -->
-    <div id="view-remote" class="hidden flex-1 flex flex-col max-w-md w-full mx-auto p-4 h-screen overflow-hidden">
-      <!-- Remote Header -->
-      <div class="flex justify-between items-center py-3 border-b border-white/5 mb-4 shrink-0">
-        <h2 class="font-display font-bold text-lg flex items-center gap-2">
-          <i data-lucide="smartphone" class="text-purple-400 w-5 h-5"></i>
-          Telecomando
-        </h2>
-        <button onclick="goBack()" class="glass-button text-xs py-1 px-3">Indietro</button>
-      </div>
-
-      <!-- Remote Pairing Form -->
-      <div id="remote-join-screen" class="flex-grow flex items-center justify-center">
-        <div class="glass-card p-6 w-full">
-          <h3 class="font-display text-md font-bold mb-2">Connettiti alla TV</h3>
-          <p class="text-[10px] text-gray-400 mb-6">Inserisci il codice di 5 numeri mostrato sulla TV.</p>
-          
-          <div class="flex flex-col gap-4">
-            <input id="remote-code-input" type="text" placeholder="Codice (es. 12345)" maxlength="5" class="glass-input text-center text-lg tracking-widest font-mono py-3 font-bold uppercase">
-            <div id="remote-error" class="hidden text-red-400 text-[10px] flex items-center gap-1">
-              <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
-              <span id="remote-error-text">Codice non valido</span>
-            </div>
-            <button onclick="connectToTV()" class="glass-button primary py-3 font-semibold text-sm">Connetti Stanza</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Remote Controls Panel -->
-      <div id="remote-controls-screen" class="hidden flex-grow flex flex-col gap-5 overflow-y-auto pb-6">
-        <!-- Paired Status Bar -->
-        <div class="glass-panel p-3.5 rounded-xl flex justify-between items-center text-[10px]">
-          <span class="flex items-center gap-2 font-medium">
-            <i data-lucide="wifi" class="text-green-400 w-4 h-4 animate-pulse"></i>
-            Connesso alla TV: <strong id="remote-paired-code" class="text-purple-300">-----</strong>
-          </span>
-          <span class="px-2 py-0.5 rounded bg-green-500/10 text-green-400 font-bold uppercase tracking-wider">Online</span>
-        </div>
-
-        <!-- WebRTC Mirror Toggle Card -->
-        <div class="glass-card p-4 shrink-0">
-          <h4 class="font-semibold text-xs mb-2">Condividi Schermo</h4>
-          <p class="text-[10px] text-gray-400 mb-3">Specchia la scheda, la finestra o l'intero schermo alla TV in tempo reale.</p>
-          
-          <button id="mirror-btn" onclick="toggleScreenShare()" class="glass-button primary w-full text-xs py-2.5">
-            <i data-lucide="cast" class="w-4 h-4"></i> Avvia Trasmissione Schermo
-          </button>
-        </div>
-
-        <!-- Now Playing widget -->
-        <div id="remote-now-playing" class="hidden glass-card p-4 flex flex-col gap-3.5 border-l-4 border-l-purple-500 shrink-0">
-          <div class="flex gap-3 items-center">
-            <img id="remote-nowplaying-cover" src="" alt="" class="w-12 h-12 rounded-lg object-cover border border-white/5">
-            <div class="overflow-hidden flex-1">
-              <h5 id="remote-nowplaying-title" class="font-semibold text-xs text-white truncate">Nessun brano in riproduzione</h5>
-              <p id="remote-nowplaying-artist" class="text-[10px] text-gray-400 truncate">Nessuno</p>
-            </div>
-          </div>
-          
-          <!-- Progress slider -->
-          <div class="flex flex-col gap-1">
-            <input id="remote-progress-range" type="range" min="0" max="100" value="0" oninput="remoteSeek(this.value)" class="w-full accent-purple-500 cursor-pointer h-1 rounded-lg">
-            <div class="flex justify-between text-[8px] text-gray-500 font-mono">
-              <span id="remote-progress-time">00:00</span>
-              <span id="remote-duration-time">00:00</span>
-            </div>
-          </div>
-
-          <!-- Controls row -->
-          <div class="flex justify-center items-center gap-6">
-            <button onclick="remoteSkip(-15)" class="glass-button p-2.5 rounded-full"><i data-lucide="skip-back" class="w-4 h-4"></i></button>
-            <button id="remote-play-btn" onclick="remoteTogglePlay()" class="glass-button primary p-3 rounded-full"><i data-lucide="play" class="w-5 h-5" id="remote-play-icon"></i></button>
-            <button onclick="remoteSkip(15)" class="glass-button p-2.5 rounded-full"><i data-lucide="skip-forward" class="w-4 h-4"></i></button>
-          </div>
-        </div>
-
-        <!-- Search Songs & Cast -->
-        <div class="flex flex-col gap-3 flex-grow min-h-0">
-          <h4 class="font-semibold text-xs">Testi & Brani</h4>
-          <form onsubmit="searchSongs(event)" class="flex gap-2 shrink-0">
-            <input id="search-input" type="text" placeholder="Titolo canzone, artista..." class="glass-input flex-1 px-4 py-2 text-sm">
-            <button type="submit" class="glass-button primary p-2.5"><i data-lucide="search" class="w-4 h-4"></i></button>
-          </form>
-
-          <div id="search-results-list" class="flex flex-col gap-2 overflow-y-auto flex-grow max-h-[220px]">
-            <!-- Results load here -->
-            <div class="text-center py-6 text-gray-500 text-xs">Cerca canzoni per caricare testi e video</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
   </main>
 
   <script>
     // --- STATE MANAGEMENT ---
-    let myRole = null;
     let peer = null;
     let conn = null; // PeerJS DataConnection
     let callInstance = null; // PeerJS MediaCall
-    let localStream = null; // Screen capture stream
     let isMirroring = false;
     let pairingCode = '';
 
@@ -495,64 +343,12 @@
     // --- INITIALIZATION ---
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
-      checkUrlParams();
+      initTV();
     });
 
-    // Check url params for direct pairing, otherwise default to 'tv'
-    function checkUrlParams() {
-      const params = new URLSearchParams(window.location.search);
-      const role = params.get('role');
-      const code = params.get('code');
-      
-      if (role === 'remote') {
-        selectRole('remote');
-        if (code) {
-          document.getElementById('remote-code-input').value = code;
-        }
-      } else {
-        selectRole('tv');
-      }
-    }
-
-    // Role Router UI Switcher
-    function selectRole(role) {
-      myRole = role;
-      document.getElementById('view-landing').classList.add('hidden');
-      
-      if (role === 'tv') {
-        document.getElementById('view-tv').classList.remove('hidden');
-        initTVPeer();
-      } else {
-        document.getElementById('view-remote').classList.remove('hidden');
-        initRemotePeer();
-      }
-    }
-
-    function goBack() {
-      if (peer) {
-        peer.destroy();
-        peer = null;
-      }
-      if (localStream) {
-        localStream.getTracks().forEach(t => t.stop());
-        localStream = null;
-      }
-      stopMirroringTV();
-      stopTimeUpdates();
-      
-      myRole = null;
-      conn = null;
-      callInstance = null;
-      isMirroring = false;
-      currentTrack = null;
-      isPlaying = false;
-      
-      document.getElementById('view-tv').classList.add('hidden');
-      document.getElementById('view-remote').classList.add('hidden');
-      document.getElementById('view-landing').classList.remove('hidden');
-      
-      // Clear URL params
-      window.history.replaceState({}, document.title, window.location.pathname);
+    function initTV() {
+      document.getElementById('view-tv').classList.remove('hidden');
+      initTVPeer();
     }
 
     // --- TV CONTROLLER ---
@@ -564,7 +360,6 @@
       document.getElementById('tv-room-code').innerText = pairingCode;
       
       // Update domain URL helper
-      const hostUrl = `${window.location.origin}${window.location.pathname}`;
       document.getElementById('tv-domain-url').innerText = `Sito: ${window.location.host}`;
 
       // Initialize PeerJS on TV
@@ -678,20 +473,32 @@
         } catch (e) {}
       }
 
+      // Recreate the player container div (YT.Player replaces it with an iframe)
+      const container = document.getElementById('youtube-player');
+      if (container && container.tagName === 'IFRAME') {
+        const newDiv = document.createElement('div');
+        newDiv.id = 'youtube-player';
+        newDiv.className = 'absolute inset-0 w-full h-full object-cover opacity-0 pointer-events-none';
+        newDiv.style.zIndex = '1';
+        container.parentNode.replaceChild(newDiv, container);
+      }
+
       ytPlayer = new YT.Player('youtube-player', {
         height: '100%',
         width: '100%',
         videoId: videoId,
+        host: 'https://www.youtube-nocookie.com',
         playerVars: {
           'autoplay': autoPlay ? 1 : 0,
-          'controls': 0,
+          'controls': 1,
           'disablekb': 1,
           'rel': 0,
           'modestbranding': 1,
           'iv_load_policy': 3,
           'fs': 0,
           'cc_load_policy': 0,
-          'playsinline': 1
+          'playsinline': 1,
+          'origin': window.location.origin
         },
         events: {
           'onReady': (event) => {
@@ -714,6 +521,10 @@
             } else {
               stopTimeUpdates();
             }
+          },
+          'onError': (event) => {
+            // If video is restricted or errors out, notify and keep UI stable
+            console.warn('YouTube Player error code:', event.data);
           }
         }
       });
@@ -861,294 +672,6 @@
       }
     }
 
-    // --- REMOTE CONTROLLER CONTROLLER ---
-    function initRemotePeer() {
-      // Connect to public PeerJS cloud server with random ID
-      peer = new Peer();
-      
-      peer.on('error', (err) => {
-        console.error('Remote Peer error:', err);
-      });
-    }
-
-    function connectToTV() {
-      const code = document.getElementById('remote-code-input').value.trim().toUpperCase();
-      if (!code) return;
-
-      document.getElementById('remote-error').classList.add('hidden');
-
-      // Establish PeerJS connection
-      conn = peer.connect(code);
-      
-      conn.on('open', () => {
-        setIsRemoteConnected(code);
-      });
-
-      conn.on('data', (data) => {
-        if (data.type === 'tv-time-sync') {
-          updateRemoteProgress(data.currentTime, data.duration);
-        } else if (data.type === 'tv-state-change') {
-          updateRemotePlayState(data.isPlaying);
-        }
-      });
-
-      conn.on('error', (err) => {
-        console.error('Connection error:', err);
-        showRemoteError('Impossibile connettersi. Verifica il codice.');
-      });
-      
-      // Handle server closed conn
-      conn.on('close', () => {
-        setIsRemoteDisconnected();
-      });
-    }
-
-    function setIsRemoteConnected(code) {
-      document.getElementById('remote-join-screen').classList.add('hidden');
-      document.getElementById('remote-controls-screen').classList.remove('hidden');
-      document.getElementById('remote-paired-code').innerText = code;
-      pairingCode = code;
-    }
-
-    function setIsRemoteDisconnected() {
-      document.getElementById('remote-controls-screen').classList.add('hidden');
-      document.getElementById('remote-join-screen').classList.remove('hidden');
-      showRemoteError('TV disconnessa.');
-      stopScreenShare();
-    }
-
-    function showRemoteError(msg) {
-      const errorDiv = document.getElementById('remote-error');
-      const errorText = document.getElementById('remote-error-text');
-      errorText.innerText = msg;
-      errorDiv.classList.remove('hidden');
-    }
-
-    // WebRTC Screen Capture on Remote
-    async function toggleScreenShare() {
-      if (isMirroring) {
-        stopScreenShare();
-        return;
-      }
-
-      try {
-        localStream = await navigator.mediaDevices.getDisplayMedia({
-          video: { width: 1920, height: 1080, frameRate: 30 },
-          audio: true
-        });
-
-        isMirroring = true;
-        document.getElementById('mirror-btn').innerHTML = `<i data-lucide="x" class="w-4 h-4"></i> Interrompi Trasmissione`;
-        lucide.createIcons();
-
-        // Establish PeerJS media call
-        callInstance = peer.call(pairingCode, localStream);
-
-        // Detect stop sharing from native browser bar
-        localStream.getVideoTracks()[0].onended = () => {
-          stopScreenShare();
-        };
-
-      } catch (err) {
-        console.error('Display capture failed:', err);
-        isMirroring = false;
-      }
-    }
-
-    function stopScreenShare() {
-      isMirroring = false;
-      document.getElementById('mirror-btn').innerHTML = `<i data-lucide="cast" class="w-4 h-4"></i> Avvia Trasmissione Schermo`;
-      lucide.createIcons();
-
-      if (localStream) {
-        localStream.getTracks().forEach(t => t.stop());
-        localStream = null;
-      }
-      if (callInstance) {
-        callInstance.close();
-        callInstance = null;
-      }
-      if (conn) {
-        conn.send({ type: 'stop-mirroring' });
-      }
-    }
-
-    // Remote Track Search (queries LRCLIB directly)
-    async function searchSongs(event) {
-      event.preventDefault();
-      const q = document.getElementById('search-input').value.trim();
-      if (!q) return;
-
-      const resultsList = document.getElementById('search-results-list');
-      resultsList.innerHTML = `<div class="flex justify-center py-6"><i data-lucide="loader" class="animate-spin text-purple-400 w-6 h-6"></i></div>`;
-      lucide.createIcons();
-
-      try {
-        // Query LRCLIB search API directly
-        const res = await fetch(`https://lrclib.net/api/search?q=${encodeURIComponent(q)}`);
-        const data = await res.json();
-        
-        resultsList.innerHTML = '';
-        if (data.length === 0) {
-          resultsList.innerHTML = `<div class="text-center py-6 text-gray-500 text-xs">Nessun brano trovato</div>`;
-          return;
-        }
-
-        data.slice(0, 8).forEach(item => {
-          const btn = document.createElement('button');
-          btn.className = 'glass-panel p-3 rounded-xl flex gap-3 text-left w-full items-center transition hover:border-white/20';
-          btn.onclick = () => castSongDialog(item);
-          
-          const coverUrl = item.albumName ? `https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=80&q=80` : ''; // placeholder cover art
-          
-          btn.innerHTML = `
-            <div class="w-10 h-10 rounded bg-purple-900/30 flex items-center justify-center shrink-0 border border-white/5">
-              <i data-lucide="music" class="w-5 h-5 text-purple-400"></i>
-            </div>
-            <div class="overflow-hidden flex-1">
-              <span class="font-semibold text-white text-xs block truncate">${item.trackName}</span>
-              <span class="text-gray-400 text-[10px] block truncate">${item.artistName} • ${item.albumName || 'Singolo'}</span>
-            </div>
-          `;
-          resultsList.appendChild(btn);
-        });
-        lucide.createIcons();
-
-      } catch (err) {
-        console.error('Search error:', err);
-        resultsList.innerHTML = `<div class="text-center py-6 text-red-400 text-xs">Errore nel caricamento dei brani</div>`;
-      }
-    }
-
-    // Prompts user for YouTube URL when song is casted
-    function castSongDialog(track) {
-      const ytUrl = prompt(`Inserisci il link del video di YouTube o l'ID del video per:\n"${track.trackName} - ${track.artistName}":`, '');
-      if (ytUrl === null) return;
-      
-      const videoId = getYoutubeId(ytUrl.trim());
-      if (!videoId) {
-        alert('ID Video non valido.');
-        return;
-      }
-
-      // Prepare lyrics payload
-      let lyricsType = 'notFound';
-      let lyrics = '';
-
-      if (track.syncedLyrics) {
-        lyricsType = 'synced';
-        lyrics = track.syncedLyrics;
-      } else if (track.plainLyrics) {
-        lyricsType = 'plain';
-        lyrics = track.plainLyrics;
-      }
-
-      const thumbnailURL = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
-
-      const selectedTrack = {
-        id: videoId,
-        title: track.trackName,
-        artist: track.artistName,
-        thumbnailURL: thumbnailURL,
-        lyricsType: lyricsType,
-        lyrics: lyrics
-      };
-
-      // Set Remote Widget
-      currentTrack = selectedTrack;
-      isPlaying = true;
-      
-      document.getElementById('remote-now-playing').classList.remove('hidden');
-      document.getElementById('remote-nowplaying-cover').src = selectedTrack.thumbnailURL;
-      document.getElementById('remote-nowplaying-title').innerText = selectedTrack.title;
-      document.getElementById('remote-nowplaying-artist').innerText = selectedTrack.artist;
-      document.getElementById('remote-play-icon').setAttribute('data-lucide', 'pause');
-      lucide.createIcons();
-
-      // Cast state sync to TV
-      if (conn) {
-        conn.send({
-          type: 'state-sync',
-          state: {
-            track: selectedTrack,
-            isPlaying: true,
-            progress: 0
-          }
-        });
-      }
-    }
-
-    // Playback sync from Remote
-    function remoteTogglePlay() {
-      if (!currentTrack) return;
-      isPlaying = !isPlaying;
-      
-      updateRemotePlayState(isPlaying);
-
-      if (conn) {
-        conn.send({
-          type: 'state-sync',
-          state: {
-            track: currentTrack,
-            isPlaying: isPlaying,
-            progress: parseFloat(document.getElementById('remote-progress-range').value)
-          }
-        });
-      }
-    }
-
-    function remoteSkip(amount) {
-      if (!currentTrack) return;
-      const range = document.getElementById('remote-progress-range');
-      let target = parseFloat(range.value) + amount;
-      target = Math.max(0, Math.min(target, parseFloat(range.max)));
-      
-      range.value = target;
-      
-      if (conn) {
-        conn.send({
-          type: 'state-sync',
-          state: {
-            track: currentTrack,
-            isPlaying: isPlaying,
-            progress: target
-          }
-        });
-      }
-    }
-
-    function remoteSeek(val) {
-      if (!currentTrack) return;
-      
-      if (conn) {
-        conn.send({
-          type: 'state-sync',
-          state: {
-            track: currentTrack,
-            isPlaying: isPlaying,
-            progress: parseFloat(val)
-          }
-        });
-      }
-    }
-
-    // Update Remote controls from TV feedback
-    function updateRemoteProgress(current, duration) {
-      document.getElementById('remote-progress-time').innerText = formatTime(current);
-      document.getElementById('remote-duration-time').innerText = formatTime(duration);
-      
-      const range = document.getElementById('remote-progress-range');
-      range.max = duration;
-      range.value = current;
-    }
-
-    function updateRemotePlayState(playing) {
-      isPlaying = playing;
-      const icon = document.getElementById('remote-play-icon');
-      icon.setAttribute('data-lucide', playing ? 'pause' : 'play');
-      lucide.createIcons();
-    }
-
     // --- PARSING HELPERS ---
     function parseLrc(lrcString) {
       const lines = [];
@@ -1180,12 +703,6 @@
           timestamp: index * 5.0,
           text: line
         }));
-    }
-
-    function getYoutubeId(url) {
-      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-      const match = url.match(regExp);
-      return (match && match[2].length === 11) ? match[2] : url;
     }
 
     function formatTime(seconds) {
