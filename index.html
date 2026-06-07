@@ -118,6 +118,8 @@
       -webkit-backdrop-filter: blur(30px);
       border: 1px solid rgba(255, 255, 255, 0.08);
       box-shadow: 0 30px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
     }
 
     .liquid-glass-card {
@@ -127,9 +129,10 @@
       border: 1px solid rgba(255,255,255,0.1);
       border-radius: 32px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
     }
 
-    /* Synced Lyrics Scroll Pane */
     .lyrics-container {
       overflow-y: scroll;
       scroll-behavior: smooth;
@@ -137,6 +140,9 @@
       padding: 40vh 0;
       mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
       -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+      isolation: isolate;
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
     }
 
     .lyrics-container::-webkit-scrollbar {
@@ -188,6 +194,9 @@
       box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(255,255,255,0.1);
       border: 1px solid rgba(255, 255, 255, 0.15);
       transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      isolation: isolate;
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
     }
 
     .album-art-tv.playing {
@@ -240,7 +249,7 @@
   <main class="flex-1 w-full flex flex-col relative z-10">
     
     <!-- TV VIEW -->
-    <div id="view-tv" class="flex-1 flex flex-col p-10 h-screen overflow-hidden relative">
+    <div id="view-tv" class="flex-1 flex flex-col p-10 h-screen overflow-hidden relative" style="isolation: isolate; transform: translateZ(0); -webkit-transform: translateZ(0);">
       
       <!-- TV Header -->
       <div class="flex justify-between items-center w-full mb-8 z-10">
