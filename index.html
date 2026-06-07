@@ -528,10 +528,7 @@
           document.getElementById('tv-album-art-container').classList.remove('playing');
         }
 
-        // We DO NOT seek ytPlayer on the TV. The TV audio should ideally be muted so it doesn't echo.
-        // Wait, the phone audio is playing. TV should just show lyrics synced to phone.
-        // Let's mute TV to prevent echo!
-        ytPlayer.mute();
+
       }
 
       // Update progress bar visually
@@ -553,7 +550,7 @@
       if (ytPlayer) {
         ytPlayer.loadVideoById(videoId);
         if (!autoPlay) ytPlayer.pauseVideo();
-        ytPlayer.mute(); // Mute to prevent echo with phone
+
         return;
       }
 
@@ -576,7 +573,7 @@
         },
         events: {
           'onReady': (event) => {
-            event.target.mute(); // Mute TV to prevent echo!
+
             const dur = event.target.getDuration();
             document.getElementById('tv-time-duration').innerText = formatTime(dur);
             if (autoPlay) {
