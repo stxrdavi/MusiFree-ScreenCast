@@ -353,7 +353,8 @@
         roomCode: "Room Code",
         defaultTitle: "Song Title",
         defaultArtist: "Artist",
-        lyricsUnavailable: "Lyrics unavailable"
+        lyricsUnavailable: "Lyrics unavailable",
+        disconnectedAlert: "Phone disconnected!"
       },
       it: {
         statusInit: "INIZIALIZZAZIONE...",
@@ -365,7 +366,8 @@
         roomCode: "Codice Stanza",
         defaultTitle: "Titolo Canzone",
         defaultArtist: "Artista",
-        lyricsUnavailable: "Testo non disponibile"
+        lyricsUnavailable: "Testo non disponibile",
+        disconnectedAlert: "Telefono disconnesso!"
       }
     };
     let currentLang = 'en';
@@ -473,6 +475,39 @@
           handleCastedMedia(data.state);
         }
       });
+
+      // Handle disconnection
+      conn.on('close', () => {
+        handleDisconnection();
+      });
+    }
+
+    function handleDisconnection() {
+      // Alert user
+      alert(translations[currentLang].disconnectedAlert);
+      
+      // Reset UI to Wait Screen
+      const dot = document.getElementById('tv-status-dot');
+      dot.className = "w-4 h-4 rounded-full bg-yellow-400 animate-pulse shadow-[0_0_15px_rgba(250,204,21,0.6)]";
+      document.getElementById('tv-status-text').innerText = translations[currentLang].statusConnecting;
+      
+      document.getElementById('tv-player-screen').classList.add('hidden');
+      document.getElementById('tv-wait-screen').classList.remove('hidden');
+      
+      // Stop player and exit fullscreen
+      if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+        ytPlayer.pauseVideo();
+      }
+      if (document.fullscreenElement) {
+        document.exitFullscreen().then(() => {
+          document.getElementById('fs-icon').setAttribute('data-lucide', 'maximize');
+          lucide.createIcons();
+        }).catch(()=>{});
+      }
+      
+      // Clear state
+      currentTrack = null;
+      conn = null;
     }
 
     // YouTube API script loader
