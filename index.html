@@ -249,17 +249,11 @@
           <span id="tv-status-text" class="text-sm font-bold tracking-widest text-gray-300">INITIALIZATION...</span>
         </div>
         <div class="flex gap-4 items-center">
-          <!-- Language Selector -->
-          <div class="relative inline-block text-left">
-            <button id="lang-btn" onclick="toggleLangMenu()" class="liquid-glass px-4 py-2.5 rounded-full hover:bg-white/10 transition-colors flex items-center gap-2 text-sm font-bold text-white shadow-[0_0_15px_rgba(255,255,255,0.1)]">
-              <i data-lucide="globe" class="w-4 h-4"></i>
-              <span id="current-lang-label">EN</span>
-              <i data-lucide="chevron-down" class="w-4 h-4"></i>
-            </button>
-            <div id="lang-menu" class="hidden absolute right-0 mt-3 w-40 liquid-glass rounded-2xl shadow-2xl border border-white/20 overflow-hidden flex flex-col z-50 backdrop-blur-3xl">
-              <button onclick="changeLang('en')" class="px-5 py-3.5 text-sm font-bold text-white hover:bg-white/20 text-left transition-colors flex items-center gap-3"><span class="text-lg">🇬🇧</span> English</button>
-              <button onclick="changeLang('it')" class="px-5 py-3.5 text-sm font-bold text-white hover:bg-white/20 text-left transition-colors flex items-center gap-3 border-t border-white/10"><span class="text-lg">🇮🇹</span> Italiano</button>
-            </div>
+          <!-- Language Selector (Slider) -->
+          <div class="relative flex items-center bg-white/5 backdrop-blur-md rounded-full p-1 cursor-pointer shadow-[0_0_15px_rgba(255,255,255,0.1)] border border-white/10 w-24 h-10 transition-colors hover:bg-white/10" onclick="toggleLangSlider()">
+            <div id="lang-slider-thumb" class="absolute left-1 w-[42px] h-8 bg-white/20 rounded-full shadow-md transition-transform duration-300"></div>
+            <div class="flex-1 text-center z-10 font-bold text-xs text-white" id="lang-lbl-en">EN</div>
+            <div class="flex-1 text-center z-10 font-bold text-xs text-white/50" id="lang-lbl-it">IT</div>
           </div>
           <!-- Fullscreen -->
           <button onclick="toggleFullscreen()" class="liquid-glass p-3 rounded-full hover:bg-white/10 transition-colors shadow-[0_0_15px_rgba(255,255,255,0.1)]">
@@ -367,14 +361,22 @@
     };
     let currentLang = 'en';
 
-    function toggleLangMenu() {
-      document.getElementById('lang-menu').classList.toggle('hidden');
+    function toggleLangSlider() {
+      if (currentLang === 'en') {
+        changeLang('it');
+        document.getElementById('lang-slider-thumb').style.transform = 'translateX(44px)';
+        document.getElementById('lang-lbl-it').classList.replace('text-white/50', 'text-white');
+        document.getElementById('lang-lbl-en').classList.replace('text-white', 'text-white/50');
+      } else {
+        changeLang('en');
+        document.getElementById('lang-slider-thumb').style.transform = 'translateX(0px)';
+        document.getElementById('lang-lbl-en').classList.replace('text-white/50', 'text-white');
+        document.getElementById('lang-lbl-it').classList.replace('text-white', 'text-white/50');
+      }
     }
 
     function changeLang(lang) {
       currentLang = lang;
-      document.getElementById('lang-menu').classList.add('hidden');
-      document.getElementById('current-lang-label').innerText = lang.toUpperCase();
       
       document.getElementById('tv-setup-title').innerText = translations[lang].setupTitle;
       document.getElementById('tv-setup-desc').innerText = translations[lang].setupDesc;
@@ -402,14 +404,7 @@
       }
     }
 
-    // Close lang menu if clicked outside
-    document.addEventListener('click', function(event) {
-      const menu = document.getElementById('lang-menu');
-      const btn = document.getElementById('lang-btn');
-      if (menu && btn && !menu.contains(event.target) && !btn.contains(event.target)) {
-        menu.classList.add('hidden');
-      }
-    });
+
 
     let currentTrack = null;
     let isPlaying = false;
