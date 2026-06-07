@@ -246,10 +246,23 @@
       <div class="flex justify-between items-center w-full mb-8 z-10">
         <div class="flex items-center gap-4 liquid-glass px-5 py-2.5 rounded-full">
           <div id="tv-status-dot" class="w-4 h-4 rounded-full bg-gray-500 animate-pulse shadow-[0_0_10px_rgba(156,163,175,0.5)]"></div>
-          <span id="tv-status-text" class="text-sm font-bold tracking-widest text-gray-300">INIZIALIZZAZIONE...</span>
+          <span id="tv-status-text" class="text-sm font-bold tracking-widest text-gray-300">INITIALIZATION...</span>
         </div>
-        <div class="flex gap-4">
-          <button onclick="toggleFullscreen()" class="liquid-glass p-3 rounded-full hover:bg-white/10 transition-colors">
+        <div class="flex gap-4 items-center">
+          <!-- Language Selector -->
+          <div class="relative inline-block text-left">
+            <button id="lang-btn" onclick="toggleLangMenu()" class="liquid-glass px-4 py-2.5 rounded-full hover:bg-white/10 transition-colors flex items-center gap-2 text-sm font-bold text-white shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+              <i data-lucide="globe" class="w-4 h-4"></i>
+              <span id="current-lang-label">EN</span>
+              <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            </button>
+            <div id="lang-menu" class="hidden absolute right-0 mt-3 w-40 liquid-glass rounded-2xl shadow-2xl border border-white/20 overflow-hidden flex flex-col z-50 backdrop-blur-3xl">
+              <button onclick="changeLang('en')" class="px-5 py-3.5 text-sm font-bold text-white hover:bg-white/20 text-left transition-colors flex items-center gap-3"><span class="text-lg">🇬🇧</span> English</button>
+              <button onclick="changeLang('it')" class="px-5 py-3.5 text-sm font-bold text-white hover:bg-white/20 text-left transition-colors flex items-center gap-3 border-t border-white/10"><span class="text-lg">🇮🇹</span> Italiano</button>
+            </div>
+          </div>
+          <!-- Fullscreen -->
+          <button onclick="toggleFullscreen()" class="liquid-glass p-3 rounded-full hover:bg-white/10 transition-colors shadow-[0_0_15px_rgba(255,255,255,0.1)]">
             <i data-lucide="maximize" id="fs-icon"></i>
           </button>
         </div>
@@ -271,11 +284,11 @@
               <path d="M 40 63 L 40 31 L 56 43 L 72 31 L 72 57" stroke="url(#logo-grad-wait)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none" />
             </svg>
           </div>
-          <h2 class="font-display text-4xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">MusiFree TV</h2>
-          <p class="text-lg text-gray-300 mb-10 font-medium">Usa l'app per inserire questo codice numerico e avviare la magia.</p>
+          <h2 id="tv-setup-title" class="font-display text-4xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">MusiFree TV</h2>
+          <p id="tv-setup-desc" class="text-lg text-gray-300 mb-10 font-medium">Use the app to enter this numeric code and start the magic.</p>
           
           <div class="flex flex-col gap-4 items-center justify-center liquid-glass p-8 rounded-3xl w-full text-center">
-            <span class="text-xs text-gray-400 block uppercase tracking-[0.3em] font-bold mb-2">Codice Stanza</span>
+            <span id="tv-room-code-label" class="text-xs text-gray-400 block uppercase tracking-[0.3em] font-bold mb-2">Room Code</span>
             <span id="tv-room-code" class="font-display text-7xl font-black text-white tracking-[0.1em] block drop-shadow-lg">-----</span>
             <span id="tv-domain-url" class="text-sm text-gray-400 mt-4 block font-medium"></span>
           </div>
@@ -294,8 +307,8 @@
           </div>
           
           <div class="text-left px-4 liquid-glass p-8 rounded-3xl">
-            <h2 id="tv-track-title" class="font-display text-3xl font-extrabold text-white mb-2 truncate drop-shadow-md">Titolo Canzone</h2>
-            <p id="tv-track-artist" class="text-xl font-medium text-gray-300 truncate drop-shadow-sm mb-8">Artista</p>
+            <h2 id="tv-track-title" class="font-display text-3xl font-extrabold text-white mb-2 truncate drop-shadow-md">Song Title</h2>
+            <p id="tv-track-artist" class="text-xl font-medium text-gray-300 truncate drop-shadow-sm mb-8">Artist</p>
             
             <div class="flex items-center gap-5">
               <span id="tv-time-current" class="text-sm font-bold text-gray-400 w-12 text-right">0:00</span>
@@ -326,7 +339,78 @@
     let conn = null; // PeerJS DataConnection
     let pairingCode = '';
 
-    // Playback States
+    const translations = {
+      en: {
+        statusInit: "INITIALIZATION...",
+        statusConnecting: "WAITING FOR PHONE",
+        statusConnected: "PHONE CONNECTED",
+        statusError: "CONNECTION ERROR",
+        setupTitle: "MusiFree TV",
+        setupDesc: "Use the app to enter this numeric code and start the magic.",
+        roomCode: "Room Code",
+        defaultTitle: "Song Title",
+        defaultArtist: "Artist",
+        lyricsUnavailable: "Lyrics unavailable"
+      },
+      it: {
+        statusInit: "INIZIALIZZAZIONE...",
+        statusConnecting: "IN ATTESA DEL TELEFONO",
+        statusConnected: "TELEFONO COLLEGATO",
+        statusError: "ERRORE DI CONNESSIONE",
+        setupTitle: "MusiFree TV",
+        setupDesc: "Usa l'app per inserire questo codice numerico e avviare la magia.",
+        roomCode: "Codice Stanza",
+        defaultTitle: "Titolo Canzone",
+        defaultArtist: "Artista",
+        lyricsUnavailable: "Testo non disponibile"
+      }
+    };
+    let currentLang = 'en';
+
+    function toggleLangMenu() {
+      document.getElementById('lang-menu').classList.toggle('hidden');
+    }
+
+    function changeLang(lang) {
+      currentLang = lang;
+      document.getElementById('lang-menu').classList.add('hidden');
+      document.getElementById('current-lang-label').innerText = lang.toUpperCase();
+      
+      document.getElementById('tv-setup-title').innerText = translations[lang].setupTitle;
+      document.getElementById('tv-setup-desc').innerText = translations[lang].setupDesc;
+      document.getElementById('tv-room-code-label').innerText = translations[lang].roomCode;
+      
+      if (!currentTrack) {
+        document.getElementById('tv-track-title').innerText = translations[lang].defaultTitle;
+        document.getElementById('tv-track-artist').innerText = translations[lang].defaultArtist;
+      }
+      
+      const statusText = document.getElementById('tv-status-text').innerText;
+      if (statusText === translations['en'].statusInit || statusText === translations['it'].statusInit) {
+        document.getElementById('tv-status-text').innerText = translations[lang].statusInit;
+      } else if (statusText === translations['en'].statusConnecting || statusText === translations['it'].statusConnecting) {
+        document.getElementById('tv-status-text').innerText = translations[lang].statusConnecting;
+      } else if (statusText === translations['en'].statusConnected || statusText === translations['it'].statusConnected) {
+        document.getElementById('tv-status-text').innerText = translations[lang].statusConnected;
+      } else if (statusText === translations['en'].statusError || statusText === translations['it'].statusError) {
+        document.getElementById('tv-status-text').innerText = translations[lang].statusError;
+      }
+
+      if (currentTrack && currentTrack.lyricsType === 'notFound') {
+        const container = document.getElementById('tv-lyrics-list');
+        container.innerHTML = `<div class="flex h-full items-center justify-center text-gray-500 font-display text-2xl font-bold">${translations[lang].lyricsUnavailable}</div>`;
+      }
+    }
+
+    // Close lang menu if clicked outside
+    document.addEventListener('click', function(event) {
+      const menu = document.getElementById('lang-menu');
+      const btn = document.getElementById('lang-btn');
+      if (menu && btn && !menu.contains(event.target) && !btn.contains(event.target)) {
+        menu.classList.add('hidden');
+      }
+    });
+
     let currentTrack = null;
     let isPlaying = false;
     let ytPlayer = null;
@@ -353,7 +437,7 @@
       peer.on('open', (id) => {
         const dot = document.getElementById('tv-status-dot');
         dot.className = "w-4 h-4 rounded-full bg-yellow-400 animate-pulse shadow-[0_0_15px_rgba(250,204,21,0.6)]";
-        document.getElementById('tv-status-text').innerText = "IN ATTESA DEL TELEFONO";
+        document.getElementById('tv-status-text').innerText = translations[currentLang].statusConnecting;
       });
 
       peer.on('connection', (connection) => {
@@ -365,14 +449,14 @@
         console.error('TV Peer error:', err);
         const dot = document.getElementById('tv-status-dot');
         dot.className = "w-4 h-4 rounded-full bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.6)]";
-        document.getElementById('tv-status-text').innerText = "ERRORE DI CONNESSIONE";
+        document.getElementById('tv-status-text').innerText = translations[currentLang].statusError;
       });
     }
 
     function handleTVConnection() {
       const dot = document.getElementById('tv-status-dot');
       dot.className = "w-4 h-4 rounded-full bg-green-400 shadow-[0_0_15px_rgba(74,222,128,0.6)]";
-      document.getElementById('tv-status-text').innerText = "TELEFONO COLLEGATO";
+      document.getElementById('tv-status-text').innerText = translations[currentLang].statusConnected;
       document.getElementById('tv-wait-screen').classList.add('hidden');
       document.getElementById('tv-player-screen').classList.remove('hidden');
 
@@ -508,7 +592,7 @@
 
       if (type === 'notFound' || !rawLyrics) {
         lyricsLines = [];
-        container.innerHTML = `<div class="flex h-full items-center justify-center text-gray-500 font-display text-2xl font-bold">Testo non disponibile</div>`;
+        container.innerHTML = `<div class="flex h-full items-center justify-center text-gray-500 font-display text-2xl font-bold">${translations[currentLang].lyricsUnavailable}</div>`;
         return;
       }
 
