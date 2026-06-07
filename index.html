@@ -299,9 +299,9 @@
       </div>
 
       <!-- TV Smart Player View -->
-      <div id="tv-player-screen" class="hidden flex-1 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center h-full pb-10">
+      <div id="tv-player-screen" class="hidden flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center h-full pb-10">
         <!-- Left panel: Art Cover & hidden YT player -->
-        <div class="lg:col-span-5 flex flex-col gap-10 justify-center h-full">
+        <div class="lg:col-span-5 flex flex-col gap-10 justify-center h-full min-h-0">
           <div id="tv-album-art-container" class="relative album-art-tv mx-auto">
             <!-- Hidden YouTube Player Iframe -->
             <div id="youtube-player" class="absolute inset-0 w-full h-full object-cover opacity-0 pointer-events-none" style="z-index: 1;"></div>
@@ -324,7 +324,7 @@
         </div>
 
         <!-- Right panel: scroll lyrics -->
-        <div class="lg:col-span-7 h-full relative">
+        <div class="lg:col-span-7 h-full relative min-h-0">
           <div id="tv-lyrics-list" class="lyrics-container px-8">
             <!-- Dynamic lyrics load here -->
             <div class="flex h-full items-center justify-center text-gray-400 font-display text-3xl font-bold">
@@ -627,11 +627,10 @@
           if (idx === currentLyricIndex) {
             line.classList.add('active');
             
-            // Scroll to center smoothly
-            line.scrollIntoView({
-              behavior: 'smooth',
-              block: 'center'
-            });
+            // Safe scroll for lyrics container only to prevent page hijack
+            const container = document.getElementById('tv-lyrics-list');
+            const offset = line.offsetTop - container.offsetTop - (container.clientHeight / 2) + (line.clientHeight / 2);
+            container.scrollTo({ top: offset, behavior: 'smooth' });
           } else if (idx < currentLyricIndex) {
             line.classList.add('past');
           } else {
