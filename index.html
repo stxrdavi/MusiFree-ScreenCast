@@ -20,22 +20,21 @@
     :root {
       --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
       --font-display: 'Outfit', var(--font-sans);
-      --bg-color: 240 15% 4%;
-      --fg-color: 0 0% 98%;
-      --primary-color: 270 95% 65%;
-      --accent-color: 320 100% 65%;
+      --bg-color: 240 20% 2%;
+      --fg-color: 0 0% 100%;
+      --primary-color: 280 100% 65%;
+      --accent-color: 320 100% 60%;
       
-      --glass-bg: rgba(18, 18, 24, 0.45);
-      --glass-border: rgba(255, 255, 255, 0.08);
-      --glass-hover: rgba(255, 255, 255, 0.12);
-      --glass-card: rgba(20, 20, 28, 0.6);
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.05);
+      --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
     }
 
     body {
       font-family: var(--font-sans);
       background-color: hsl(var(--bg-color));
       color: hsl(var(--fg-color));
-      overflow-x: hidden;
+      overflow: hidden;
       min-height: 100vh;
       -webkit-font-smoothing: antialiased;
     }
@@ -49,8 +48,7 @@
       bottom: 0;
       z-index: -2;
       overflow: hidden;
-      background-color: #08080c;
-      filter: blur(80px);
+      background-color: #050508;
       pointer-events: none;
     }
 
@@ -58,32 +56,38 @@
       position: absolute;
       border-radius: 50%;
       mix-blend-mode: screen;
-      opacity: 0.2;
+      opacity: 0.4;
+      filter: blur(90px);
     }
 
-    @keyframes ambientGlow {
-      0% { transform: translate(0px, 0px) scale(1) rotate(0deg); }
-      33% { transform: translate(30px, -50px) scale(1.1) rotate(120deg); }
-      66% { transform: translate(-20px, 20px) scale(0.95) rotate(240deg); }
-      100% { transform: translate(0px, 0px) scale(1) rotate(360deg); }
+    @keyframes ambientGlow1 {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(10vw, 10vh) scale(1.2); }
+      100% { transform: translate(0, 0) scale(1); }
+    }
+
+    @keyframes ambientGlow2 {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(-10vw, -10vh) scale(1.3); }
+      100% { transform: translate(0, 0) scale(1); }
     }
 
     .ball-1 {
-      width: 50vw;
-      height: 50vw;
-      background: radial-gradient(circle, hsl(var(--primary-color)) 0%, rgba(0,0,0,0) 70%);
-      top: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, hsl(var(--primary-color)) 0%, transparent 60%);
+      top: -20%;
       left: -10%;
-      animation: ambientGlow 25s infinite alternate ease-in-out;
+      animation: ambientGlow1 20s infinite alternate ease-in-out;
     }
 
     .ball-2 {
-      width: 45vw;
-      height: 45vw;
-      background: radial-gradient(circle, hsl(var(--accent-color)) 0%, rgba(0,0,0,0) 70%);
-      bottom: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, hsl(var(--accent-color)) 0%, transparent 60%);
+      bottom: -20%;
       right: -10%;
-      animation: ambientGlow 30s infinite alternate-reverse ease-in-out;
+      animation: ambientGlow2 25s infinite alternate-reverse ease-in-out;
     }
 
     /* Blurred Background Art */
@@ -96,9 +100,9 @@
       z-index: -1;
       background-size: cover;
       background-position: center;
-      filter: blur(50px) brightness(0.3) saturate(1.3);
-      transform: scale(1.1);
-      transition: background-image 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+      filter: blur(80px) brightness(0.4) saturate(1.5);
+      transform: scale(1.2);
+      transition: background-image 1.5s ease-in-out;
       pointer-events: none;
       opacity: 0;
     }
@@ -108,21 +112,21 @@
     }
 
     /* Glassmorphism Styles */
-    .glass-panel {
-      background: var(--glass-bg);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--glass-border);
+    .liquid-glass {
+      background: rgba(255, 255, 255, 0.02);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
     }
 
-    .glass-card {
-      background: var(--glass-card);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid var(--glass-border);
-      border-radius: 24px;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    .liquid-glass-card {
+      background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 32px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
     }
 
     /* Synced Lyrics Scroll Pane */
@@ -131,6 +135,8 @@
       scroll-behavior: smooth;
       height: 100%;
       padding: 40vh 0;
+      mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+      -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
     }
 
     .lyrics-container::-webkit-scrollbar {
@@ -139,81 +145,85 @@
 
     .lyric-line {
       font-family: var(--font-display);
-      font-size: 2.2rem;
+      font-size: 2.5rem;
       font-weight: 700;
-      line-height: 1.4;
-      padding: 12px 18px;
-      color: rgba(255, 255, 255, 0.3);
+      line-height: 1.5;
+      padding: 16px 24px;
+      color: rgba(255, 255, 255, 0.2);
       transform-origin: left center;
-      transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+      transition: all 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+      filter: blur(2px);
+      transform: scale(0.95);
     }
 
     .lyric-line.active {
       color: #ffffff;
-      font-size: 3.2rem;
+      font-size: 3.5rem;
       font-weight: 800;
-      filter: drop-shadow(0 0 15px rgba(168, 85, 247, 0.5));
-      text-shadow: 0 0 15px rgba(168, 85, 247, 0.45);
-      padding-left: 24px;
+      filter: blur(0px) drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
+      transform: scale(1.05);
+      padding-left: 32px;
+      background: linear-gradient(90deg, #fff, #e0e0e0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .lyric-line.past {
-      color: rgba(255, 255, 255, 0.15);
-      font-size: 1.8rem;
-      font-weight: 600;
+      color: rgba(255, 255, 255, 0.4);
+      filter: blur(1px);
     }
 
     .lyric-line.future {
-      color: rgba(255, 255, 255, 0.4);
+      color: rgba(255, 255, 255, 0.2);
     }
 
     /* Album art card on TV */
     .album-art-tv {
       width: 100%;
-      max-width: 380px;
+      max-width: 460px;
       aspect-ratio: 1;
       margin: 0 auto;
-      border-radius: 24px;
+      border-radius: 32px;
       overflow: hidden;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(255,255,255,0.1);
       border: 1px solid rgba(255, 255, 255, 0.15);
       transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
+    .album-art-tv.playing {
+      transform: scale(1.02);
+      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8), 0 0 60px rgba(255,255,255,0.15);
+    }
+
     .progress-bar-container {
       width: 100%;
-      height: 6px;
+      height: 8px;
       background: rgba(255, 255, 255, 0.1);
-      border-radius: 4px;
+      border-radius: 8px;
       overflow: hidden;
+      position: relative;
     }
 
     .progress-bar-fill {
       height: 100%;
-      background: linear-gradient(90deg, hsl(var(--primary-color)) 0%, hsl(var(--accent-color)) 100%);
-      border-radius: 4px;
+      background: linear-gradient(90deg, #fff, #e0e0e0);
+      border-radius: 8px;
       width: 0%;
       transition: width 0.1s linear;
+      box-shadow: 0 0 10px rgba(255,255,255,0.5);
     }
 
-    .glass-button {
-      background: rgba(255, 255, 255, 0.07);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      color: white;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      font-weight: 600;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Pulse animation for waiting screen */
+    @keyframes heartbeat {
+      0% { transform: scale(1); }
+      15% { transform: scale(1.1); }
+      30% { transform: scale(1); }
+      45% { transform: scale(1.1); }
+      60% { transform: scale(1); }
+      100% { transform: scale(1); }
     }
-
-    .glass-button:hover:not(:disabled) {
-      background: rgba(255, 255, 255, 0.14);
-      border-color: rgba(255, 255, 255, 0.2);
-      transform: scale(1.02);
+    .heartbeat {
+      animation: heartbeat 2s infinite;
     }
   </style>
 </head>
@@ -230,38 +240,30 @@
   <main class="flex-1 w-full flex flex-col relative z-10">
     
     <!-- TV VIEW -->
-    <div id="view-tv" class="flex-1 flex flex-col p-8 h-screen overflow-hidden relative">
+    <div id="view-tv" class="flex-1 flex flex-col p-10 h-screen overflow-hidden relative">
       
-      <!-- AD POPUP -->
-      <div id="tv-ad-popup" class="hidden absolute top-8 left-1/2 -translate-x-1/2 z-50 glass-panel px-6 py-3 rounded-full flex items-center gap-3 border border-yellow-500/30 bg-yellow-500/10 shadow-lg shadow-yellow-500/20 backdrop-blur-xl transition-all duration-300">
-        <div class="w-2 h-2 rounded-full bg-yellow-500 animate-ping"></div>
-        <span class="text-sm font-bold text-yellow-500 tracking-wide">Pubblicità in riproduzione...</span>
-      </div>
-
       <!-- TV Header -->
-      <div class="flex justify-between items-center w-full mb-6 z-10">
-        <div class="flex items-center gap-3">
-          <div id="tv-status-dot" class="w-3.5 h-3.5 rounded-full bg-gray-500 animate-pulse"></div>
-          <span id="tv-status-text" class="text-xs font-semibold tracking-wider text-gray-400">CONNESSIONE PEER...</span>
+      <div class="flex justify-between items-center w-full mb-8 z-10">
+        <div class="flex items-center gap-4 liquid-glass px-5 py-2.5 rounded-full">
+          <div id="tv-status-dot" class="w-4 h-4 rounded-full bg-gray-500 animate-pulse shadow-[0_0_10px_rgba(156,163,175,0.5)]"></div>
+          <span id="tv-status-text" class="text-sm font-bold tracking-widest text-gray-300">INIZIALIZZAZIONE...</span>
         </div>
         <div class="flex gap-4">
-          <button onclick="toggleFullscreen()" class="glass-button p-2.5 rounded-full">
+          <button onclick="toggleFullscreen()" class="liquid-glass p-3 rounded-full hover:bg-white/10 transition-colors">
             <i data-lucide="maximize" id="fs-icon"></i>
           </button>
-          <button onclick="location.reload()" class="glass-button px-4 py-1.5 text-xs">Reset</button>
         </div>
       </div>
 
       <!-- TV Wait Screen -->
       <div id="tv-wait-screen" class="flex-1 flex items-center justify-center z-10">
-        <div class="glass-card p-8 max-w-lg w-full text-center flex flex-col items-center">
-          <div class="w-20 h-20 mb-5 animate-pulse">
+        <div class="liquid-glass-card p-12 max-w-2xl w-full text-center flex flex-col items-center">
+          <div class="w-28 h-28 mb-8 heartbeat">
             <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
               <defs>
                 <linearGradient id="logo-grad-wait" x1="0%" y1="100%" x2="100%" y2="0%">
-                  <stop offset="0%" stop-color="#2f60ff" />
-                  <stop offset="50%" stop-color="#9d27ff" />
-                  <stop offset="100%" stop-color="#ff00ff" />
+                  <stop offset="0%" stop-color="#fff" />
+                  <stop offset="100%" stop-color="#aaa" />
                 </linearGradient>
               </defs>
               <circle cx="34" cy="63" r="12" fill="url(#logo-grad-wait)" />
@@ -269,81 +271,65 @@
               <path d="M 40 63 L 40 31 L 56 43 L 72 31 L 72 57" stroke="url(#logo-grad-wait)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none" />
             </svg>
           </div>
-          <h2 class="font-display text-2xl font-bold mb-3">Configura MusiFree TV</h2>
-          <p class="text-xs text-gray-400 mb-6">Usa l'app per inserire questo codice numerico e avviare la riproduzione sulla TV.</p>
+          <h2 class="font-display text-4xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">MusiFree TV</h2>
+          <p class="text-lg text-gray-300 mb-10 font-medium">Usa l'app per inserire questo codice numerico e avviare la magia.</p>
           
-          <div class="flex flex-col gap-4 items-center justify-center bg-black/30 p-6 rounded-2xl border border-white/5 w-full text-center">
-            <span class="text-[10px] text-gray-500 block uppercase tracking-wider mb-1">Codice Stanza</span>
-            <span id="tv-room-code" class="font-display text-5xl font-extrabold text-white tracking-widest block">-----</span>
-            <span id="tv-domain-url" class="text-[10px] text-purple-400 mt-1 block"></span>
+          <div class="flex flex-col gap-4 items-center justify-center liquid-glass p-8 rounded-3xl w-full text-center">
+            <span class="text-xs text-gray-400 block uppercase tracking-[0.3em] font-bold mb-2">Codice Stanza</span>
+            <span id="tv-room-code" class="font-display text-7xl font-black text-white tracking-[0.1em] block drop-shadow-lg">-----</span>
+            <span id="tv-domain-url" class="text-sm text-gray-400 mt-4 block font-medium"></span>
           </div>
-        </div>
-      </div>
-
-      <!-- TV Mirror Screen View (WebRTC) -->
-      <div id="tv-mirror-screen" class="hidden flex-1 flex justify-center items-center relative rounded-2xl overflow-hidden glass-panel border border-white/5">
-        <video id="tv-mirror-video" autoplay playsinline class="w-full h-full object-contain"></video>
-        <div class="absolute top-4 left-4 glass-panel px-4 py-1.5 rounded-full text-[10px] flex items-center gap-2">
-          <div class="w-2 h-2 rounded-full bg-red-500 animate-ping"></div>
-          Specchio Schermo Attivo
         </div>
       </div>
 
       <!-- TV Smart Player View -->
-      <div id="tv-player-screen" class="hidden flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center h-full">
+      <div id="tv-player-screen" class="hidden flex-1 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center h-full pb-10">
         <!-- Left panel: Art Cover & hidden YT player -->
-        <div class="lg:col-span-5 flex flex-col gap-6 justify-center">
-          <div class="relative album-art-tv">
+        <div class="lg:col-span-5 flex flex-col gap-10 justify-center h-full">
+          <div id="tv-album-art-container" class="relative album-art-tv mx-auto">
             <!-- Hidden YouTube Player Iframe -->
             <div id="youtube-player" class="absolute inset-0 w-full h-full object-cover opacity-0 pointer-events-none" style="z-index: 1;"></div>
             <!-- Art thumbnail -->
-            <img id="tv-track-cover" src="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22></svg>" alt="" class="w-full h-full object-cover">
+            <img id="tv-track-cover" src="" alt="" class="w-full h-full object-cover">
           </div>
           
-          <div class="text-left px-4">
-            <h2 id="tv-track-title" class="font-display text-2xl font-extrabold text-white mb-1 truncate">Titolo Canzone</h2>
-            <p id="tv-track-artist" class="text-purple-400 text-md font-medium truncate">Artista</p>
+          <div class="text-left px-4 liquid-glass p-8 rounded-3xl">
+            <h2 id="tv-track-title" class="font-display text-3xl font-extrabold text-white mb-2 truncate drop-shadow-md">Titolo Canzone</h2>
+            <p id="tv-track-artist" class="text-xl font-medium text-gray-300 truncate drop-shadow-sm mb-8">Artista</p>
             
-            <div class="flex items-center gap-4 mt-6">
-              <span id="tv-time-current" class="text-[10px] text-gray-400">00:00</span>
+            <div class="flex items-center gap-5">
+              <span id="tv-time-current" class="text-sm font-bold text-gray-400 w-12 text-right">0:00</span>
               <div class="progress-bar-container flex-1">
                 <div id="tv-progress-fill" class="progress-bar-fill"></div>
               </div>
-              <span id="tv-time-duration" class="text-[10px] text-gray-400">00:00</span>
+              <span id="tv-time-duration" class="text-sm font-bold text-gray-400 w-12 text-left">0:00</span>
             </div>
           </div>
         </div>
 
         <!-- Right panel: scroll lyrics -->
-        <div class="lg:col-span-7 glass-panel rounded-2xl h-[78vh] p-6 relative overflow-hidden">
-          <div id="tv-lyrics-list" class="lyrics-container">
+        <div class="lg:col-span-7 h-full relative">
+          <div id="tv-lyrics-list" class="lyrics-container px-8">
             <!-- Dynamic lyrics load here -->
-            <div class="flex h-full items-center justify-center text-gray-500 font-display text-xl">
-              Casting... in attesa di brani
+            <div class="flex h-full items-center justify-center text-gray-400 font-display text-3xl font-bold">
+              In attesa della musica...
             </div>
           </div>
-          <!-- Edge Faders -->
-          <div class="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-[#0a0a0f] to-transparent pointer-events-none"></div>
-          <div class="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-[#0a0a0f] to-transparent pointer-events-none"></div>
         </div>
       </div>
     </div>
-
   </main>
 
   <script>
     // --- STATE MANAGEMENT ---
     let peer = null;
     let conn = null; // PeerJS DataConnection
-    let callInstance = null; // PeerJS MediaCall
-    let isMirroring = false;
     let pairingCode = '';
 
     // Playback States
     let currentTrack = null;
     let isPlaying = false;
     let ytPlayer = null;
-    let progressInterval = null;
     let lyricsLines = [];
     let currentLyricIndex = -1;
 
@@ -354,28 +340,20 @@
     });
 
     function initTV() {
-      document.getElementById('view-tv').classList.remove('hidden');
-      initTVPeer();
-    }
-
-    // --- TV CONTROLLER ---
-    function initTVPeer() {
       // Generate unique short pairing code: 5 numbers
       const randomNum = Math.floor(10000 + Math.random() * 90000);
       pairingCode = String(randomNum);
       
       document.getElementById('tv-room-code').innerText = pairingCode;
-      
-      // Update domain URL helper
       document.getElementById('tv-domain-url').innerText = `Sito: ${window.location.host}`;
 
       // Initialize PeerJS on TV
       peer = new Peer(pairingCode);
 
       peer.on('open', (id) => {
-        document.getElementById('tv-status-dot').className = "w-3.5 h-3.5 rounded-full bg-yellow-500 animate-pulse";
-        document.getElementById('tv-status-text').innerText = "IN ATTESA DI CONTROLLER";
-        console.log('TV Peer opened with ID:', id);
+        const dot = document.getElementById('tv-status-dot');
+        dot.className = "w-4 h-4 rounded-full bg-yellow-400 animate-pulse shadow-[0_0_15px_rgba(250,204,21,0.6)]";
+        document.getElementById('tv-status-text').innerText = "IN ATTESA DEL TELEFONO";
       });
 
       peer.on('connection', (connection) => {
@@ -383,25 +361,18 @@
         handleTVConnection();
       });
 
-      peer.on('call', (call) => {
-        callInstance = call;
-        call.answer();
-        
-        call.on('stream', (stream) => {
-          showTVMirror(stream);
-        });
-      });
-
       peer.on('error', (err) => {
         console.error('TV Peer error:', err);
-        document.getElementById('tv-status-dot').className = "w-3.5 h-3.5 rounded-full bg-red-500";
-        document.getElementById('tv-status-text').innerText = "ERRORE PEER CONNECTION";
+        const dot = document.getElementById('tv-status-dot');
+        dot.className = "w-4 h-4 rounded-full bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.6)]";
+        document.getElementById('tv-status-text').innerText = "ERRORE DI CONNESSIONE";
       });
     }
 
     function handleTVConnection() {
-      document.getElementById('tv-status-dot').className = "w-3.5 h-3.5 rounded-full bg-green-500";
-      document.getElementById('tv-status-text').innerText = "TELECOMANDO ABBINATO";
+      const dot = document.getElementById('tv-status-dot');
+      dot.className = "w-4 h-4 rounded-full bg-green-400 shadow-[0_0_15px_rgba(74,222,128,0.6)]";
+      document.getElementById('tv-status-text').innerText = "TELEFONO COLLEGATO";
       document.getElementById('tv-wait-screen').classList.add('hidden');
       document.getElementById('tv-player-screen').classList.remove('hidden');
 
@@ -412,13 +383,11 @@
       conn.on('data', (data) => {
         if (data.type === 'state-sync') {
           handleCastedMedia(data.state);
-        } else if (data.type === 'stop-mirroring') {
-          stopMirroringTV();
         }
       });
     }
 
-    // YouTube API script loader callback
+    // YouTube API script loader
     if (!window.YT) {
       const tag = document.createElement('script');
       tag.src = 'https://www.youtube.com/iframe_api';
@@ -428,9 +397,11 @@
 
     // Handles playing media sent from remote
     function handleCastedMedia(state) {
-      if (isMirroring) stopMirroringTV();
-
       const isNewTrack = !currentTrack || currentTrack.id !== state.track.id;
+      
+      // se l'array delle lyrics è cambiato in lunghezza (es. prima era empty e ora sono arrivate), ricarichiamo le lyrics
+      const hasNewLyrics = currentTrack && state.track.lyrics && currentTrack.lyrics !== state.track.lyrics;
+      
       currentTrack = state.track;
       isPlaying = state.isPlaying;
 
@@ -446,41 +417,55 @@
 
         // Reset progress & lyrics
         document.getElementById('tv-progress-fill').style.width = '0%';
-        document.getElementById('tv-time-current').innerText = '00:00';
-        document.getElementById('tv-time-duration').innerText = '00:00';
+        document.getElementById('tv-time-current').innerText = '0:00';
+        document.getElementById('tv-time-duration').innerText = '0:00';
         
         // Load lyrics
         setTVLyrics(currentTrack.lyricsType, currentTrack.lyrics);
 
         // Load YouTube Player
         loadYTPlayer(currentTrack.id, isPlaying);
-      } else {
-        // Sync Player
-        if (ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
-          if (isPlaying) {
-            ytPlayer.playVideo();
-          } else {
-            ytPlayer.pauseVideo();
-          }
+      } else if (hasNewLyrics) {
+        // Lyrics loaded async on the phone
+        setTVLyrics(currentTrack.lyricsType, currentTrack.lyrics);
+      }
 
-          // Seek sync
-          const currentTvTime = ytPlayer.getCurrentTime() || 0;
-          if (Math.abs(currentTvTime - state.progress) > 2.5) {
-            ytPlayer.seekTo(state.progress, true);
-          }
+      // Sync Player state
+      if (ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
+        if (isPlaying) {
+          ytPlayer.playVideo();
+          document.getElementById('tv-album-art-container').classList.add('playing');
+        } else {
+          ytPlayer.pauseVideo();
+          document.getElementById('tv-album-art-container').classList.remove('playing');
         }
+
+        // We DO NOT seek ytPlayer on the TV. The TV audio should ideally be muted so it doesn't echo.
+        // Wait, the phone audio is playing. TV should just show lyrics synced to phone.
+        // Let's mute TV to prevent echo!
+        ytPlayer.mute();
+      }
+
+      // Update progress bar visually
+      const duration = (ytPlayer && ytPlayer.getDuration) ? (ytPlayer.getDuration() || 0) : 0;
+      if (duration > 0) {
+        document.getElementById('tv-time-current').innerText = formatTime(state.progress);
+        document.getElementById('tv-time-duration').innerText = formatTime(duration);
+        const percent = (state.progress / duration) * 100;
+        document.getElementById('tv-progress-fill').style.width = `${percent}%`;
+      }
+
+      // 100% PERFECT SYNC: Use iPhone's currentLineIndex!
+      if (state.currentLineIndex !== undefined) {
+        syncLyricsByIndex(state.currentLineIndex);
       }
     }
 
-    let currentRequestedVideoId = null;
-
     function loadYTPlayer(videoId, autoPlay) {
-      currentRequestedVideoId = videoId;
       if (ytPlayer) {
         ytPlayer.loadVideoById(videoId);
-        if (!autoPlay) {
-          ytPlayer.pauseVideo();
-        }
+        if (!autoPlay) ytPlayer.pauseVideo();
+        ytPlayer.mute(); // Mute to prevent echo with phone
         return;
       }
 
@@ -491,7 +476,7 @@
         host: 'https://www.youtube-nocookie.com',
         playerVars: {
           'autoplay': autoPlay ? 1 : 0,
-          'controls': 1,
+          'controls': 0,
           'disablekb': 1,
           'rel': 0,
           'modestbranding': 1,
@@ -503,55 +488,13 @@
         },
         events: {
           'onReady': (event) => {
+            event.target.mute(); // Mute TV to prevent echo!
             const dur = event.target.getDuration();
             document.getElementById('tv-time-duration').innerText = formatTime(dur);
-            if (autoPlay) event.target.playVideo();
-          },
-          'onStateChange': (event) => {
-            const state = event.data;
-            const playing = (state === YT.PlayerState.PLAYING);
-            isPlaying = playing;
-            
-            // Ad Detection: if the currently playing video ID doesn't match our requested ID, it's an ad.
-            // Also if duration is unusually short (< 60s) for a song that we know is longer, but video_id check is safer.
-            const currentVideoData = ytPlayer.getVideoData();
-            const isAd = currentVideoData && currentVideoData.video_id && currentVideoData.video_id !== currentRequestedVideoId;
-            
-            const adPopup = document.getElementById('tv-ad-popup');
-            const ytContainer = document.getElementById('youtube-player');
-            
-            if (isAd && playing) {
-              // Show Ad Popup
-              if (adPopup) adPopup.classList.remove('hidden');
-              // Make iframe visible and clickable so user can click "Skip Ad"
-              if (ytContainer) {
-                ytContainer.classList.remove('opacity-0', 'pointer-events-none');
-                ytContainer.classList.add('opacity-100', 'pointer-events-auto', 'z-50');
-              }
-            } else if (playing) {
-              // Hide Ad Popup
-              if (adPopup) adPopup.classList.add('hidden');
-              // Hide iframe again
-              if (ytContainer) {
-                ytContainer.classList.add('opacity-0', 'pointer-events-none');
-                ytContainer.classList.remove('opacity-100', 'pointer-events-auto', 'z-50');
-              }
+            if (autoPlay) {
+              event.target.playVideo();
+              document.getElementById('tv-album-art-container').classList.add('playing');
             }
-            
-            // Notify Remote about state change
-            if (conn) {
-              conn.send({ type: 'tv-state-change', isPlaying: playing });
-            }
-
-            if (playing) {
-              startTimeUpdates();
-            } else {
-              stopTimeUpdates();
-            }
-          },
-          'onError': (event) => {
-            // If video is restricted or errors out, notify and keep UI stable
-            console.warn('YouTube Player error code:', event.data);
           }
         }
       });
@@ -565,7 +508,7 @@
 
       if (type === 'notFound' || !rawLyrics) {
         lyricsLines = [];
-        container.innerHTML = `<div class="flex h-full items-center justify-center text-gray-500 font-display text-2xl">Testo non disponibile</div>`;
+        container.innerHTML = `<div class="flex h-full items-center justify-center text-gray-500 font-display text-2xl font-bold">Testo non disponibile</div>`;
         return;
       }
 
@@ -584,59 +527,19 @@
       });
     }
 
-    // Scroll Polling
-    function startTimeUpdates() {
-      stopTimeUpdates();
-      progressInterval = setInterval(() => {
-        if (ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
-          const current = ytPlayer.getCurrentTime();
-          const duration = ytPlayer.getDuration() || 0;
-          
-          document.getElementById('tv-time-current').innerText = formatTime(current);
-          const percent = duration > 0 ? (current / duration) * 100 : 0;
-          document.getElementById('tv-progress-fill').style.width = `${percent}%`;
+    function syncLyricsByIndex(index) {
+      if (lyricsLines.length === 0 || index < 0 || index >= lyricsLines.length) return;
 
-          // Sync Time updates to Remote
-          if (conn) {
-            conn.send({ type: 'tv-time-sync', currentTime: current, duration: duration });
-          }
-
-          // Sync lyrics scrolling
-          syncLyrics(current);
-        }
-      }, 250);
-    }
-
-    function stopTimeUpdates() {
-      if (progressInterval) {
-        clearInterval(progressInterval);
-        progressInterval = null;
-      }
-    }
-
-    function syncLyrics(time) {
-      if (lyricsLines.length === 0) return;
-
-      let activeIdx = -1;
-      for (let i = 0; i < lyricsLines.length; i++) {
-        if (lyricsLines[i].timestamp <= time) {
-          activeIdx = i;
-        } else {
-          break;
-        }
-      }
-
-      if (activeIdx !== currentLyricIndex) {
-        currentLyricIndex = activeIdx;
+      if (index !== currentLyricIndex) {
+        currentLyricIndex = index;
         
-        // Reset classes
         const lines = document.querySelectorAll('.lyric-line');
         lines.forEach((line, idx) => {
           line.classList.remove('active', 'past', 'future');
           if (idx === currentLyricIndex) {
             line.classList.add('active');
             
-            // Scroll to center
+            // Scroll to center smoothly
             line.scrollIntoView({
               behavior: 'smooth',
               block: 'center'
@@ -647,32 +550,6 @@
             line.classList.add('future');
           }
         });
-      }
-    }
-
-    function showTVMirror(stream) {
-      isMirroring = true;
-      document.getElementById('tv-player-screen').classList.add('hidden');
-      document.getElementById('tv-mirror-screen').classList.remove('hidden');
-
-      const video = document.getElementById('tv-mirror-video');
-      video.srcObject = stream;
-      
-      // Auto full screen
-      requestFullscreen();
-    }
-
-    function stopMirroringTV() {
-      isMirroring = false;
-      document.getElementById('tv-mirror-screen').classList.add('hidden');
-      document.getElementById('tv-player-screen').classList.remove('hidden');
-      
-      const video = document.getElementById('tv-mirror-video');
-      video.srcObject = null;
-      
-      if (callInstance) {
-        callInstance.close();
-        callInstance = null;
       }
     }
 
@@ -733,10 +610,10 @@
     }
 
     function formatTime(seconds) {
-      if (isNaN(seconds) || seconds === null) return '00:00';
+      if (isNaN(seconds) || seconds === null) return '0:00';
       const min = Math.floor(seconds / 60);
       const sec = Math.floor(seconds % 60);
-      return `${min < 10 ? '0' + min : min}:${sec < 10 ? '0' + sec : sec}`;
+      return `${min}:${sec < 10 ? '0' + sec : sec}`;
     }
   </script>
 </body>
