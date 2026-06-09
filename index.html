@@ -238,6 +238,24 @@
 </head>
 <body class="flex flex-col min-h-screen">
 
+  <!-- Mobile Warning Modal -->
+  <div id="mobile-warning" class="hidden fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/80 backdrop-blur-lg">
+    <div class="liquid-glass-card p-8 max-w-md w-full text-center flex flex-col items-center">
+      <div class="w-16 h-16 mb-6 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-500">
+        <i data-lucide="smartphone" class="w-8 h-8"></i>
+      </div>
+      <h3 id="warn-title" class="font-display text-2xl font-bold mb-3 text-white">Larger Screen Recommended</h3>
+      <p id="warn-desc" class="text-sm text-gray-300 mb-8 leading-relaxed">
+        This page is designed as a TV receiver screen. For the best experience, please open it on a PC, TV, or Tablet.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 w-full">
+        <button id="warn-continue" onclick="dismissMobileWarning()" class="flex-1 px-6 py-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white font-semibold transition-all text-sm">
+          Continue anyway
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Dynamic ambient background -->
   <div class="ambient-bg-container">
     <div class="ambient-glow-ball ball-1"></div>
@@ -354,7 +372,10 @@
         defaultTitle: "Song Title",
         defaultArtist: "Artist",
         lyricsUnavailable: "Lyrics unavailable",
-        disconnectedAlert: "Phone disconnected!"
+        disconnectedAlert: "Phone disconnected!",
+        warnTitle: "Larger Screen Recommended",
+        warnDesc: "This page is designed as a TV receiver screen. For the best experience, please open it on a PC, TV, or Tablet.",
+        warnContinue: "Continue anyway"
       },
       it: {
         statusInit: "INIZIALIZZAZIONE...",
@@ -367,7 +388,10 @@
         defaultTitle: "Titolo Canzone",
         defaultArtist: "Artista",
         lyricsUnavailable: "Testo non disponibile",
-        disconnectedAlert: "Telefono disconnesso!"
+        disconnectedAlert: "Telefono disconnesso!",
+        warnTitle: "Schermo più grande consigliato",
+        warnDesc: "Questa pagina è progettata come schermo TV ricevente. Per un'esperienza ottimale, aprila su un PC, una TV o un Tablet.",
+        warnContinue: "Continua comunque"
       }
     };
     let currentLang = 'en';
@@ -392,6 +416,14 @@
       document.getElementById('tv-setup-title').innerText = translations[lang].setupTitle;
       document.getElementById('tv-setup-desc').innerText = translations[lang].setupDesc;
       document.getElementById('tv-room-code-label').innerText = translations[lang].roomCode;
+      
+      // Translate mobile warning if elements exist
+      const warnTitle = document.getElementById('warn-title');
+      const warnDesc = document.getElementById('warn-desc');
+      const warnContinue = document.getElementById('warn-continue');
+      if (warnTitle) warnTitle.innerText = translations[lang].warnTitle;
+      if (warnDesc) warnDesc.innerText = translations[lang].warnDesc;
+      if (warnContinue) warnContinue.innerText = translations[lang].warnContinue;
       
       if (!currentTrack) {
         document.getElementById('tv-track-title').innerText = translations[lang].defaultTitle;
@@ -423,9 +455,48 @@
     let lyricsLines = [];
     let currentLyricIndex = -1;
 
+    function isMobilePhone() {
+      const ua = navigator.userAgent || navigator.vendor || window.opera;
+      return /iPhone|iPod|Android.*Mobile|Windows Phone|IEMobile/i.test(ua);
+    }
+
+    function showMobileWarning() {
+      const warning = document.getElementById('mobile-warning');
+      if (warning) {
+        warning.classList.remove('hidden');
+        lucide.createIcons();
+      }
+    }
+
+    function dismissMobileWarning() {
+      const warning = document.getElementById('mobile-warning');
+      if (warning) {
+        warning.classList.add('hidden');
+      }
+    }
+
     // --- INITIALIZATION ---
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
+      
+      // Auto-detect browser language
+      const browserLang = navigator.language || navigator.userLanguage;
+      if (browserLang && browserLang.startsWith('it')) {
+        changeLang('it');
+        const sliderThumb = document.getElementById('lang-slider-thumb');
+        const lblIt = document.getElementById('lang-lbl-it');
+        const lblEn = document.getElementById('lang-lbl-en');
+        if (sliderThumb) sliderThumb.style.transform = 'translateX(44px)';
+        if (lblIt && lblEn) {
+          lblIt.classList.replace('text-white/50', 'text-white');
+          lblEn.classList.replace('text-white', 'text-white/50');
+        }
+      }
+      
+      if (isMobilePhone()) {
+        showMobileWarning();
+      }
+      
       initTV();
     });
 
